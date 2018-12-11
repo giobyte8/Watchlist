@@ -1,8 +1,5 @@
 import requests
 
-from core.models import Movie
-from datetime import datetime
-
 
 class TMDBClient:
 
@@ -12,7 +9,7 @@ class TMDBClient:
 
     def random_movies(self):
         movies = []
-        for i in range(5, 7):
+        for i in range(5, 9):
             movies += self.popular_movies(i)
 
         return movies
@@ -31,17 +28,4 @@ class TMDBClient:
     def movie_details(self, movie_id):
         url = self.api_base_bath + 'movie/' + str(movie_id)
         payload = {'api_key': self.api_key}
-        j_movie = requests.get(url, payload).json()
-
-        movie = Movie()
-        movie.tmdb_id = j_movie['id']
-        movie.title = j_movie['title']
-        movie.original_title = j_movie['original_title']
-        movie.release_date = datetime.strptime(
-            j_movie['release_date'],
-            '%Y-%m-%d'
-        )
-        movie.runtime = j_movie['runtime']
-        movie.synopsis = j_movie['overview']
-        movie.rating = j_movie['vote_average']
-        return movie
+        return requests.get(url, payload).json()

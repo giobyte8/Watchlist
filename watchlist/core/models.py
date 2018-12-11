@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.utils import timezone
 
@@ -81,6 +83,13 @@ class Genre(models.Model):
     class Meta:
         db_table = 'genre'
 
+    @staticmethod
+    def from_json(j_genre):
+        genre = Genre()
+        genre.id = j_genre['id']
+        genre.name = j_genre['name']
+        return genre
+
 
 class Movie(models.Model):
     tmdb_id = models.IntegerField()
@@ -100,6 +109,21 @@ class Movie(models.Model):
 
     class Meta:
         db_table = 'movie'
+
+    @staticmethod
+    def from_json(j_movie):
+        movie = Movie()
+        movie.tmdb_id = j_movie['id']
+        movie.title = j_movie['title']
+        movie.original_title = j_movie['original_title']
+        movie.release_date = datetime.strptime(
+            j_movie['release_date'],
+            '%Y-%m-%d'
+        )
+        movie.runtime = j_movie['runtime']
+        movie.synopsis = j_movie['overview']
+        movie.rating = j_movie['vote_average']
+        return movie
 
 
 class WatchlistHasMovie(models.Model):
