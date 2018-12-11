@@ -7,8 +7,13 @@ class Command(BaseCommand):
     tmdb_client = TMDBClient()
 
     def handle(self, *args, **options):
+        movies = self.tmdb_client.random_movies()
+        for movie in movies:
+            # print(movie.original_title)
+            movie.save()
+
         self.stdout.write(self.style.SUCCESS(
-            self.tmdb_client.random_movie()
+            "Movies seeded"
         ))
 
 

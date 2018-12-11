@@ -45,10 +45,3 @@ class TMDBClient:
         movie.synopsis = j_movie['overview']
         movie.rating = j_movie['vote_average']
         return movie
-
-    def random_movie(self):
-        movies = self.random_movies()
-        for movie in movies:
-            print(movie.title)
-
-        return ''
