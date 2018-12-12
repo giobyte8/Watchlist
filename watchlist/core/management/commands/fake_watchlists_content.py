@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Movie, Genre
+from core.models import Movie, Genre, Crew
 
 
 class Command(BaseCommand):
@@ -15,6 +15,7 @@ class Command(BaseCommand):
             if count == 0:
                 movie.save()
                 self.process_genres(j_movie, movie)
+                self.process_credits(j_movie, movie)
 
         self.stdout.write(self.style.SUCCESS(
             "Movies seeded"
@@ -32,3 +33,26 @@ class Command(BaseCommand):
             else:
                 genre = Genre.objects.filter(id=genre.id).first()
                 movie.genres.add(genre)
+
+    @staticmethod
+    def process_credits(j_movie, movie):
+
+        # Process cast
+        for j_cast in j_movie['credits']['cast']:
+            crew = Crew()
+            crew.movie_id = movie.id
+            crew.category_id = 2
+            crew.name = j_cast['name']
+            crew.character_name = j_cast['character']
+            crew.picture_url = j_cast['profile_path']
+            crew.save()
+
+        # Process directors
+        for j_crew in j_movie['credits']['crew']:
+            if j_crew['job'] == 'Director':
+                crew = Crew()
+                crew.movie_id = movie.id
+                crew.category_id = 1
+                crew.name = j_crew['name']
+                crew.picture_url = j_crew['profile_path']
+                crew.save()

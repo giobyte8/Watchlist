@@ -27,5 +27,8 @@ class TMDBClient:
 
     def movie_details(self, movie_id):
         url = self.api_base_bath + 'movie/' + str(movie_id)
-        payload = {'api_key': self.api_key}
+        payload = {
+            'api_key': self.api_key,
+            'append_to_response': 'credits'
+        }
         return requests.get(url, payload).json()
