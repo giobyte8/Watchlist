@@ -1,13 +1,19 @@
 from django.core.management.base import BaseCommand
 
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Movie, Genre, Crew
+from core.models import Movie, Genre, Crew, Picture
 
 
 class Command(BaseCommand):
     tmdb_client = TMDBClient()
 
     def handle(self, *args, **options):
+        self.seed_movies()
+        self.stdout.write(self.style.SUCCESS(
+            "Movies seeded"
+        ))
+
+    def seed_movies(self):
         j_movies = self.tmdb_client.random_movies()
         for j_movie in j_movies:
             movie = Movie.from_json(j_movie)
@@ -16,10 +22,7 @@ class Command(BaseCommand):
                 movie.save()
                 self.process_genres(j_movie, movie)
                 self.process_credits(j_movie, movie)
-
-        self.stdout.write(self.style.SUCCESS(
-            "Movies seeded"
-        ))
+                self.process_pictures(j_movie, movie)
 
     @staticmethod
     def process_genres(j_movie, movie):
@@ -56,3 +59,19 @@ class Command(BaseCommand):
                 crew.name = j_crew['name']
                 crew.picture_url = j_crew['profile_path']
                 crew.save()
+
+    @staticmethod
+    def process_pictures(j_movie, movie):
+        if 'backdrop_path' in j_movie:
+            picture = Picture()
+            picture.category_id = 2
+            picture.movie_id = movie.id
+            picture.url = j_movie['backdrop_path']
+            picture.save()
+
+        if 'poster_path' in j_movie:
+            picture = Picture()
+            picture.category_id = 1
+            picture.movie_id = movie.id
+            picture.url = j_movie['poster_path']
+            picture.save()

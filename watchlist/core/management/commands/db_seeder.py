@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import Role, WatchlistPermission, CrewCategory
+from core.models import Role, WatchlistPermission, CrewCategory, PictureCategory
 
 
 class Command(BaseCommand):
@@ -7,6 +7,7 @@ class Command(BaseCommand):
         self.seed_roles()
         self.seed_watchlist_permissions()
         self.seed_crew_categories()
+        self.seed_picture_categories()
         self.stdout.write(self.style.SUCCESS(
             'Database seeded successfully'))
 
@@ -42,5 +43,15 @@ class Command(BaseCommand):
 
         category = CrewCategory()
         category.name = 'Cast'
+        category.save()
+
+    @staticmethod
+    def seed_picture_categories():
+        category = PictureCategory()
+        category.name = 'Poster'
+        category.save()
+
+        category = PictureCategory()
+        category.name = 'Backdrop'
         category.save()
 
