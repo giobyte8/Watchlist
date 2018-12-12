@@ -129,7 +129,7 @@ class Movie(models.Model):
 class WatchlistHasMovie(models.Model):
     seen: models.BooleanField(default=False)
     added_at = models.DateTimeField(default=timezone.now)
-    seen_at = models.DateTimeField()
+    seen_at = models.DateTimeField(null=True)
     watchlist = models.ForeignKey(
         Watchlist,
         on_delete=models.CASCADE,

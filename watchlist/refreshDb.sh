@@ -7,3 +7,4 @@ python manage.py migrate core
 # Apply seeders
 python manage.py db_seeder
 python manage.py fake_data_seeder
+python manage.py fake_watchlists_content

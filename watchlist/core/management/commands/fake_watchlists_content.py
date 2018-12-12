@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Movie, Genre, Crew, Picture
+from core.models import Movie, Genre, Crew, Picture, Watchlist, WatchlistHasMovie
 
 
 class Command(BaseCommand):
@@ -9,8 +9,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.seed_movies()
+        self.add_movies_to_watch_lists()
         self.stdout.write(self.style.SUCCESS(
-            "Movies seeded"
+            "Database seeded with fake data"
         ))
 
     def seed_movies(self):
@@ -23,6 +24,26 @@ class Command(BaseCommand):
                 self.process_genres(j_movie, movie)
                 self.process_credits(j_movie, movie)
                 self.process_pictures(j_movie, movie)
+
+    @staticmethod
+    def add_movies_to_watch_lists():
+        lists = Watchlist.objects.all()
+        offset_index = 0
+
+        for watchlist in lists:
+            if offset_index == 3:
+                offset_index = 0
+
+            offset = 20 * offset_index
+            movies = Movie.objects.filter(id__gt=offset)[:20]
+            for movie in movies:
+                has_movie = WatchlistHasMovie()
+                has_movie.watchlist_id = watchlist.id
+                has_movie.movie_id = movie.id
+                has_movie.added_by_id = watchlist.created_by.id
+                has_movie.save()
+
+            offset_index += 1
 
     @staticmethod
     def process_genres(j_movie, movie):

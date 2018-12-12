@@ -8,8 +8,6 @@ class Command(BaseCommand):
         self.seed_watchlist_permissions()
         self.seed_crew_categories()
         self.seed_picture_categories()
-        self.stdout.write(self.style.SUCCESS(
-            'Database seeded successfully'))
 
     @staticmethod
     def seed_roles():
