@@ -133,7 +133,7 @@ class WatchlistHasMovie(models.Model):
     watchlist = models.ForeignKey(
         Watchlist,
         on_delete=models.CASCADE,
-        related_name='hasMovies'
+        related_name='has_movies'
     )
     movie = models.ForeignKey(
         Movie,
