@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: Watchlist API
+  description: Watchlist API for web and mobile applications
+  version: 1.0
+
+servers:
+  - url: http:localhost:8081/api
+    description: Development server
+
+paths:
+  /login:
+    post:
+      summary: Verifies user credentials
+      description: Lorem ipsum dollot
+      responses:
+        '200':
+          description: A JSON object representation of user
+          content: 
+            application/json:
+            
