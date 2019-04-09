@@ -83,14 +83,14 @@ class Command(BaseCommand):
 
     @staticmethod
     def process_pictures(j_movie, movie):
-        if 'backdrop_path' in j_movie:
+        if 'backdrop_path' in j_movie and j_movie['backdrop_path'] != None:
             picture = Picture()
             picture.category_id = 2
             picture.movie_id = movie.id
             picture.url = j_movie['backdrop_path']
             picture.save()
 
-        if 'poster_path' in j_movie:
+        if 'poster_path' in j_movie and j_movie['poster_path'] != None:
             picture = Picture()
             picture.category_id = 1
             picture.movie_id = movie.id

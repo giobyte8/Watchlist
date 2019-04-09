@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'watchlist',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': '192.168.0.15',
+        'HOST': '172.17.0.2',
         'PORT': '3306'
     }
 }
