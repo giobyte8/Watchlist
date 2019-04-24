@@ -11,11 +11,273 @@ servers:
 paths:
   /login:
     post:
-      summary: Verifies user credentials
-      description: Lorem ipsum dollot
+      summary: Verifies/Register the user credentials
+      description: >
+        Verifies the provided oauth token and register (If was not
+        registered previously) to the user. If user is registered,
+        its default list will be created
+      parameters:
+        - in: body
+          schema:
+            $ref: '#/components/schemas/UserCredentials'
       responses:
         '200':
-          description: A JSON object representation of user
+          description: The logged in user
           content: 
             application/json:
+              type: object
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/{userId}/lists:
+    get:
+      summary: Retrieves all the watchlists of specified user
+      parameters:
+        - name: id,
+          in: path
+          description: User id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: An array with all user lists
+          content:
+            application/json:
+              type: object
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Watchlist'
+    post:
+      summary: Creates a new list for user
+      parameters:
+        - name: id,
+          in: path
+          description: User id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: body
+          schema:
+            $ref: '#/components/schemas/Watchlist'
+      responses:
+        '200':
+          dscription: The created watchlist
+          content:
+            application/json:
+              type: object
+              schema:
+                $ref: '#/components/schemas/Watchlist'
+
+  /lists/{listId}:
+    get:
+      summary: Retrieves the contents for specified list
+      parameters:
+        - name: id
+          in: path
+          description: Id of list
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: An array with all the movies for specified list
+          content:
+            application/json:
+              type: object
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+
+    post:
+      summary: Adds the specified movie to this list
+      description: >
+        Adds the specified movie to this list. <br/>
+        NOTE: The specified movie will be fetched from the movie database,
+        with all its crew, pictures and genres info. So only 'the movie database
+        id' is required
+      parameters:
+        - name: id
+          in: path
+          description: Id oflist
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: body
+          schema:
+            $ref: '#/components/schemas/MoviePost'
+      responses:
+        '200':
+          description: >
+            The created watchlist has movie object in order
+            to refresh the rendered watchlist
+          content:
+            application/json:
+              type: object
+              schema:
+                $ref: '#/components/schemas/WatchlistHasMovie'
+          
+
+components:
+  schemas:
+    UserCredentials:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 500
+        email:
+          type: string
+          maxLength: 1000
+        picture:
+          type: string
+          maxLength: 5000
+        token:
+          type: string
+          maxLength: 1000
+        auth_provider_id:
+          type: integer
+          format: int32
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          maxLength: 500
+        email:
+          type: string
+          maxLength: 1000
+        picture:
+          type: string
+          maxLength: 5000
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    Watchlist:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          maxLength: 255
+        is_default_list:
+          type: boolean
+        created_by:
+          type: integer
+          format: int32
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+        deleted:
+          type: boolean
+
+    WatchlistHasMovie:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        watchlist_id:
+          type: integer
+          format: int32
+        movie_id:
+          type: integer
+          format: int32
+        added_by:
+          type: integer
+          format: int32
+        added_at:
+          type: string
+          format: date
+        seen_at:
+          type: string
+          format: datetime
+        movie:
+          $ref: '#/components/schemas/Movie'
+
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        tmdb_id:
+          type: integer
+          format: int32
+        title:
+          type: string
+        original_title:
+          type: string
+        release_date:
+          type: string
+          format: date
+        runtime:
+          type: integer
+          format: int32
+        synopsis:
+          type: string
+        rating:
+          type: number
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+        pictures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Picture'
+
+    MoviePost:
+      type: object
+      properties:
+        tmdb_id:
+          type: integer
+          format: int32
+        added_by:
+          type: integer
+          format: int32
+    
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+
+    Picture:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        movie_id:
+          type: integer
+          format: int32
+        picture_category_id:
+          type: integer
+          format: int32
+        url:
+          type: string
+          format: uri
             

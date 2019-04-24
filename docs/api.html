@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Watchlist OAS</title>
+
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css" >
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"> </script>
+<script type="text/javascript">
+    window.onload = function() {
+        // Swagger-ui configuration goes here.
+        // See further: https://github.com/swagger-api/swagger-ui/blob/master/do    cs/usage/configuration.md
+        SwaggerUIBundle({
+            deepLinking: true,
+            dom_id: '#swagger-ui',
+            showExtensions: true,
+            showCommonExtensions: true,
+            url: './api.yaml' // <-- adjust this to your webserver's structure
+        });
+    };
+</script>
+</body>
+</html>
+
