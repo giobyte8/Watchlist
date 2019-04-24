@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Watchlist API
   description: Watchlist API for web and mobile applications
-  version: 1.0
+  version: "1.0"
 
 servers:
   - url: http:localhost:8081/api
@@ -17,7 +17,8 @@ paths:
         registered previously) to the user. If user is registered,
         its default list will be created
       parameters:
-        - in: body
+        - name: Credentials
+          in: body
           schema:
             $ref: '#/components/schemas/UserCredentials'
       responses:
@@ -25,7 +26,6 @@ paths:
           description: The logged in user
           content: 
             application/json:
-              type: object
               schema:
                 $ref: '#/components/schemas/User'
 
@@ -45,7 +45,6 @@ paths:
           description: An array with all user lists
           content:
             application/json:
-              type: object
               schema:
                 type: array
                 items:
@@ -60,15 +59,15 @@ paths:
           schema:
             type: integer
             format: int32
-        - in: body
+        - name: Watchlist
+          in: body
           schema:
             $ref: '#/components/schemas/Watchlist'
       responses:
         '200':
-          dscription: The created watchlist
+          description: The created watchlist
           content:
             application/json:
-              type: object
               schema:
                 $ref: '#/components/schemas/Watchlist'
 
@@ -88,7 +87,6 @@ paths:
           description: An array with all the movies for specified list
           content:
             application/json:
-              type: object
               schema:
                 type: array
                 items:
@@ -109,7 +107,8 @@ paths:
           schema:
             type: integer
             format: int32
-        - in: body
+        - name: moviePost
+          in: body
           schema:
             $ref: '#/components/schemas/MoviePost'
       responses:
@@ -119,7 +118,6 @@ paths:
             to refresh the rendered watchlist
           content:
             application/json:
-              type: object
               schema:
                 $ref: '#/components/schemas/WatchlistHasMovie'
           
