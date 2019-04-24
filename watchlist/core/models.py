@@ -27,6 +27,29 @@ class User(models.Model):
         db_table = 'user'
 
 
+class AuthProvider(models.Model):
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = 'auth_provider'
+
+
+class Credential(models.Model):
+    token = models.CharField(max_length=1000)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column='user_id',
+        related_name='+'
+    )
+    auth_provider = models.ForeignKey(
+        AuthProvider,
+        on_delete=models.CASCADE,
+        db_column='auth_provider_id',
+        related_name='+'
+    )
+
+
 class Watchlist(models.Model):
     name = models.CharField(max_length=255)
     is_default_list = models.BooleanField(default=False)
