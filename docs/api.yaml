@@ -107,7 +107,7 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: moviePost
+        - name: MoviePost
           in: body
           schema:
             $ref: '#/components/schemas/MoviePost'
