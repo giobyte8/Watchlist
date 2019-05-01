@@ -108,7 +108,7 @@ class UserHasWatchlist(models.Model):
 
 
 class Genre(models.Model):
-    name: models.CharField(255)
+    name = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'genre'
@@ -157,7 +157,6 @@ class Movie(models.Model):
 
 
 class WatchlistHasMovie(models.Model):
-    seen: models.BooleanField(default=False)
     added_at = models.DateTimeField(default=timezone.now)
     seen_at = models.DateTimeField(null=True)
     watchlist = models.ForeignKey(
