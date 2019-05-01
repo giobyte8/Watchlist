@@ -71,7 +71,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Watchlist'
 
-  /lists/{listId}:
+  /lists/{listId}/movies:
     get:
       summary: Retrieves the contents for specified list
       parameters:
@@ -90,7 +90,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Movie'
+                  $ref: '#/components/schemas/WatchlistHasMovie'
 
     post:
       summary: Adds the specified movie to this list
@@ -208,7 +208,7 @@ components:
           format: date
         seen_at:
           type: string
-          format: datetime
+          format: date
         movie:
           $ref: '#/components/schemas/Movie'
 

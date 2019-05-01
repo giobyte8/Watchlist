@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializer import WatchlistSerializer, WatchlistContentSerializer
+from api.serializer import WatchlistSerializer, WatchlistContentSerializer, WatchlistHasMovieSerializer
 from core.models import Watchlist, User
 
 
@@ -13,9 +13,17 @@ class Watchlists(APIView):
         return Response(serializer.data)
 
 
-class WatchlistContent(APIView):
+class WatchlistMovies(APIView):
+
     def get(self, request, watchlist_id):
         watchlist = Watchlist.objects.get(pk=watchlist_id)
-        serializer = WatchlistContentSerializer(watchlist)
+        for has_movie in watchlist.has_movies.all():
+            print(has_movie.movie.title)
+
+        serializer = WatchlistHasMovieSerializer(
+            watchlist.has_movies,
+            many=True
+        )
+        # serializer = WatchlistContentSerializer(watchlist)
         return Response(serializer.data)
 

@@ -1,5 +1,14 @@
 from rest_framework import serializers
-from core.models import Watchlist, WatchlistHasMovie, Movie
+from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Picture, PictureCategory
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = (
+            'id',
+            'name'
+        )
 
 
 class WatchlistSerializer(serializers.ModelSerializer):
@@ -15,10 +24,43 @@ class WatchlistSerializer(serializers.ModelSerializer):
         )
 
 
+class PictureCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PictureCategory
+        fields = (
+            'id',
+            'name'
+        )
+
+
+class PictureSerializer(serializers.ModelSerializer):
+    category = PictureCategorySerializer()
+
+    class Meta:
+        model = Picture
+        fields = (
+            'id',
+            'url',
+            'category'
+        )
+
+
 class MovieSerializer(serializers.ModelSerializer):
+    genres = GenreSerializer(many=True)
+    pictures = PictureSerializer(many=True)
+
     class Meta:
         model = Movie
-        fields = ('id', 'title')
+        fields = (
+            'id',
+            'tmdb_id',
+            'title',
+            'original_title',
+            'synopsis',
+            'rating',
+            'genres',
+            'pictures'
+        )
 
 
 class WatchlistHasMovieSerializer(serializers.ModelSerializer):
@@ -26,7 +68,7 @@ class WatchlistHasMovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WatchlistHasMovie
-        fields = ('id', 'added_at', 'seen_at', 'movie')
+        fields = ('id', 'added_at', 'seen_at', 'added_by', 'movie')
 
 
 class WatchlistContentSerializer(serializers.ModelSerializer):
