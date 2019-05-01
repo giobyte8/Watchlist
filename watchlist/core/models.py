@@ -22,6 +22,11 @@ class User(models.Model):
         on_delete=models.PROTECT,
         related_name='users'
     )
+    watchlists = models.ManyToManyField(
+        'Watchlist',
+        through='UserHasWatchlist',
+        through_fields=('user', 'watchlist')
+    )
 
     class Meta:
         db_table = 'user'
@@ -54,17 +59,18 @@ class Watchlist(models.Model):
     name = models.CharField(max_length=255)
     is_default_list = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        db_column='created_by',
-        related_name='+'
-    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'watchlist'
+
+    def owner(self):
+        return UserHasWatchlist\
+            .objects\
+            .filter(watchlist=self, permission_id=1)\
+            .first()\
+            .user
 
 
 class WatchlistPermission(models.Model):
@@ -80,7 +86,8 @@ class UserHasWatchlist(models.Model):
         User,
         on_delete=models.CASCADE,
         db_column='shared_by',
-        related_name='+'
+        related_name='+',
+        null=True
     )
     watchlist = models.ForeignKey(
         Watchlist,

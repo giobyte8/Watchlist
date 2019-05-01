@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 has_movie = WatchlistHasMovie()
                 has_movie.watchlist_id = watchlist.id
                 has_movie.movie_id = movie.id
-                has_movie.added_by_id = watchlist.created_by.id
+                has_movie.added_by_id = watchlist.owner().id
                 has_movie.save()
 
             offset_index += 1

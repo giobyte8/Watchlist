@@ -3,7 +3,7 @@ from django.db import transaction
 from faker import Faker
 
 from core.management.fake_providers.watchlist_name_provider import Provider
-from core.models import User, Watchlist
+from core.models import User, Watchlist, UserHasWatchlist
 
 
 # noinspection PyMethodMayBeStatic
@@ -43,5 +43,10 @@ class Command(BaseCommand):
         watchlist = Watchlist()
         watchlist.name = self.fake.watchlist_name()
         watchlist.is_default_list = is_default
-        watchlist.created_by_id = user_id
         watchlist.save()
+
+        has_watchlist = UserHasWatchlist()
+        has_watchlist.watchlist = watchlist
+        has_watchlist.user_id = user_id
+        has_watchlist.permission_id = 1  # Owner
+        has_watchlist.save()
