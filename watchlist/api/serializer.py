@@ -77,3 +77,15 @@ class WatchlistContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Watchlist
         fields = ('id', 'name', 'is_default_list', 'has_movies')
+
+
+class WatchlistPostResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField()
+    message = serializers.CharField()
+    watchlist = WatchlistSerializer()
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass

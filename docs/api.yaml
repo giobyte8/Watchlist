@@ -69,7 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Watchlist'
+                $ref: '#/components/schemas/WatchlistPostResponse'
 
   /lists/{listId}/movies:
     get:
@@ -176,9 +176,6 @@ components:
           maxLength: 255
         is_default_list:
           type: boolean
-        created_by:
-          type: integer
-          format: int32
         created_at:
           type: string
           format: date
@@ -278,4 +275,14 @@ components:
         url:
           type: string
           format: uri
+
+    WatchlistPostResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        watchlist:
+          $ref: '#/components/schemas/Watchlist'
             

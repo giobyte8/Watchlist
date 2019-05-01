@@ -2,9 +2,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializer import WatchlistSerializer, WatchlistHasMovieSerializer
+from api.serializer import WatchlistSerializer, WatchlistHasMovieSerializer, WatchlistPostResponseSerializer
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture
+from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist
 
 
 class Watchlists(APIView):
@@ -14,6 +14,43 @@ class Watchlists(APIView):
         lists = Watchlist.objects.filter(user__pk=user_id)
         serializer = WatchlistSerializer(lists, many=True)
         return Response(serializer.data)
+
+    def post(self, request, user_id):
+        serializer = WatchlistSerializer(data=request.data)
+        if serializer.is_valid():
+
+            # Another list with same name?
+            previous_list = Watchlist.objects.\
+                filter(
+                    name=serializer.validated_data.get('name'),
+                    user__id=user_id
+                )\
+                .first()
+            if previous_list is not None:
+                list_post_response = {
+                    "success": False,
+                    "message": "A list with same name is already registered",
+                    "watchlist": previous_list
+                }
+                response_serializer = WatchlistPostResponseSerializer(list_post_response)
+                return Response(response_serializer.data)
+
+            watchlist = serializer.save()
+            UserHasWatchlist.objects.create(
+                user_id=user_id,
+                watchlist=watchlist,
+                permission_id=1
+            )
+
+            list_post_response = {
+                "success": True,
+                "message": "",
+                "watchlist": watchlist
+            }
+            response_serializer = WatchlistPostResponseSerializer(list_post_response)
+            return Response(response_serializer.data)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class WatchlistMovies(APIView):
