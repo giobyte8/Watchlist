@@ -5,7 +5,14 @@ from core.models import Watchlist, WatchlistHasMovie, Movie
 class WatchlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Watchlist
-        fields = ('id', 'name', 'is_default_list')
+        fields = (
+            'id',
+            'name',
+            'is_default_list',
+            'created_at',
+            'updated_at',
+            'deleted'
+        )
 
 
 class MovieSerializer(serializers.ModelSerializer):
