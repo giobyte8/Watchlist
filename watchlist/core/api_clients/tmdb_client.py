@@ -31,4 +31,9 @@ class TMDBClient:
             'api_key': self.api_key,
             'append_to_response': 'credits'
         }
-        return requests.get(url, payload).json()
+
+        response = requests.get(url, payload)
+        if response.status_code == 200:
+            return requests.get(url, payload).json()
+        else:
+            return None
