@@ -125,8 +125,8 @@ class Movie(models.Model):
     tmdb_id = models.IntegerField()
     title = models.CharField(max_length=255)
     original_title = models.CharField(max_length=255)
-    release_date = models.DateField(),
-    runtime = models.IntegerField(),
+    release_date = models.DateField()
+    runtime = models.IntegerField(default=0)
     synopsis = models.CharField(max_length=5000)
     rating = models.FloatField()
     created_at = models.DateTimeField(default=timezone.now)
@@ -150,7 +150,7 @@ class Movie(models.Model):
             j_movie['release_date'],
             '%Y-%m-%d'
         )
-        movie.runtime = j_movie['runtime']
+        movie.runtime = j_movie['runtime'] if j_movie['runtime'] is not None else 0
         movie.synopsis = j_movie['overview']
         movie.rating = j_movie['vote_average']
         return movie
