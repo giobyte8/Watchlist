@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Picture, PictureCategory
+from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Picture, PictureCategory, User
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -61,6 +61,12 @@ class MovieSerializer(serializers.ModelSerializer):
             'genres',
             'pictures'
         )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'email', 'picture', 'created_at', 'updated_at')
 
 
 class WatchlistHasMovieSerializer(serializers.ModelSerializer):

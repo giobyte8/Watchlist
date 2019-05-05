@@ -2,9 +2,20 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializer import WatchlistSerializer, WatchlistHasMovieSerializer, WatchlistPostResponseSerializer
+from api.serializer import WatchlistSerializer, WatchlistHasMovieSerializer, WatchlistPostResponseSerializer, \
+    UserSerializer
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist
+from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist, User
+
+
+class Auth(APIView):
+
+    def post(self, request):
+        token = request.data['token']
+        user = User.objects.filter(role_id=2).first()
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 
 class Watchlists(APIView):
