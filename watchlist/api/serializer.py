@@ -56,6 +56,7 @@ class MovieSerializer(serializers.ModelSerializer):
             'tmdb_id',
             'title',
             'original_title',
+            'release_date',
             'synopsis',
             'rating',
             'genres',
