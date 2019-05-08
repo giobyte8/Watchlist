@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand
-from core.models import Role, WatchlistPermission, CrewCategory, PictureCategory
+from core.models import Role, WatchlistPermission, CrewCategory, PictureCategory, AuthProvider
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         self.seed_roles()
+        self.seed_auth_providers()
         self.seed_watchlist_permissions()
         self.seed_crew_categories()
         self.seed_picture_categories()
@@ -18,6 +19,15 @@ class Command(BaseCommand):
         audience = Role()
         audience.name = 'watcher'
         audience.save()
+
+    def seed_auth_providers(self):
+        fb = AuthProvider()
+        fb.name = "Facebook"
+        fb.save()
+
+        google = AuthProvider()
+        google.name = "Google"
+        google.save()
 
     @staticmethod
     def seed_watchlist_permissions():

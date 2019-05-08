@@ -3,19 +3,68 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.serializer import WatchlistSerializer, WatchlistHasMovieSerializer, WatchlistPostResponseSerializer, \
-    UserSerializer
+    LoginResponseSerializer
+from core.api_clients.fb_client import FBClient
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist, User
+from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist, User, Credential
 
 
 class Auth(APIView):
+    _fb_client = FBClient()
 
     def post(self, request):
+        name = request.data['name']
+        email = request.data['email']
+        picture = request.data['picture']
         token = request.data['token']
-        user = User.objects.filter(role_id=2).first()
+        auth_provider_id = request.data['auth_provider_id']
+        response = {'success': False}
 
-        serializer = UserSerializer(user)
+        if auth_provider_id == 1:
+            if self._fb_client.verify_token(email, token):
+                response['success'] = True
+                response['message'] = 'Login successful'
+                response['user'] = self._upsert_user(
+                    name,
+                    email,
+                    picture,
+                    token,
+                    1
+                )
+            else:
+                response['message'] = 'Facebook auth token verification has failed'
+                response['user'] = None
+        else:
+            response['message'] = 'Unsupported auth provider'
+            response['user'] = None
+
+        serializer = LoginResponseSerializer(response)
         return Response(serializer.data)
+
+    def _upsert_user(self, name, email, picture, token, auth_provider_id):
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            user = User()
+
+        user.picture = picture
+        user.name = name
+        user.email = email
+        user.role_id = 2
+        user.save()
+
+        credential = Credential.objects.filter(
+            auth_provider_id=auth_provider_id,
+            user_id=user.id
+        ).first()
+        if credential is None:
+            credential = Credential()
+
+        credential.token = token
+        credential.auth_provider_id = auth_provider_id
+        credential.user_id = user.id
+        credential.save()
+
+        return user
 
 
 class Watchlists(APIView):

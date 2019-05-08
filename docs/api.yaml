@@ -23,11 +23,11 @@ paths:
             $ref: '#/components/schemas/UserCredentials'
       responses:
         '200':
-          description: The logged in user
+          description: Response to login request
           content: 
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/LoginResponse'
 
   /user/{userId}/lists:
     get:
@@ -164,6 +164,16 @@ components:
         updated_at:
           type: string
           format: date
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          message:
+            type: string
+          user:
+            $ref: '#/components/schemas/User'
 
     Watchlist:
       type: object

@@ -70,6 +70,18 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'email', 'picture', 'created_at', 'updated_at')
 
 
+class LoginResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField()
+    message = serializers.CharField()
+    user = UserSerializer()
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
+
 class WatchlistHasMovieSerializer(serializers.ModelSerializer):
     movie = MovieSerializer()
 
