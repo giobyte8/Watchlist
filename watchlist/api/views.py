@@ -1,12 +1,18 @@
+import datetime
+
+import jwt
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.auth import APIWatchlistAuthentication
 from api.serializer import WatchlistSerializer, WatchlistHasMovieSerializer, WatchlistPostResponseSerializer, \
     LoginResponseSerializer
 from core.api_clients.fb_client import FBClient
 from core.api_clients.tmdb_client import TMDBClient
-from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist, User, Credential
+from core.models import Watchlist, WatchlistHasMovie, Movie, Genre, Crew, Picture, UserHasWatchlist, User, Credential, \
+    Session
 
 
 class Auth(APIView):
@@ -31,12 +37,15 @@ class Auth(APIView):
                     token,
                     1
                 )
+                response['token'] = self._generate_jwt(response['user'], request)
             else:
                 response['message'] = 'Facebook auth token verification has failed'
                 response['user'] = None
+                response['token'] = None
         else:
             response['message'] = 'Unsupported auth provider'
             response['user'] = None
+            response['token'] = None
 
         serializer = LoginResponseSerializer(response)
         return Response(serializer.data)
@@ -66,8 +75,31 @@ class Auth(APIView):
 
         return user
 
+    def _generate_jwt(self, user, request):
+        exp = datetime.datetime.now() + datetime.timedelta(days=7)
+        payload = {
+            'user_id': user.id,
+            'exp': exp.timestamp()
+        }
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
+
+        session = Session()
+        session.token = token.decode('utf-8')
+        session.os = request.user_agent.os.family
+        session.os_version = request.user_agent.os.version
+        session.browser = request.user_agent.browser.family
+        session.browser_version = request.user_agent.browser.version
+        session.device = request.user_agent.device.family
+        session.expiration_date = exp
+        session.user = user
+        session.save()
+
+        return session.token
+
 
 class Watchlists(APIView):
+    authentication_classes = (APIWatchlistAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     # noinspection PyUnusedLocal
     def get(self, request, user_id):

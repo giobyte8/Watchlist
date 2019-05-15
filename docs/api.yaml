@@ -170,9 +170,11 @@ components:
       properties:
         success:
           type: boolean
-          message:
-            type: string
-          user:
+        message:
+          type: string
+        jwt:
+          type: string
+        user:
             $ref: '#/components/schemas/User'
 
     Watchlist:

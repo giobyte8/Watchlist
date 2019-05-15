@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from django.utils import timezone
 
@@ -11,7 +12,7 @@ class Role(models.Model):
         db_table = 'role'
 
 
-class User(models.Model):
+class User(AbstractBaseUser):
     picture = models.CharField(max_length=5000)
     name = models.CharField(max_length=500)
     email = models.CharField(max_length=1000)
@@ -27,6 +28,8 @@ class User(models.Model):
         through='UserHasWatchlist',
         through_fields=('user', 'watchlist')
     )
+
+    USERNAME_FIELD = 'email'
 
     class Meta:
         db_table = 'user'
@@ -54,6 +57,29 @@ class Credential(models.Model):
         related_name='+'
     )
 
+    class Meta:
+        db_table = 'credential'
+
+
+class Session(models.Model):
+    token = models.CharField(max_length=1000)
+    os = models.CharField(max_length=255, null=True)
+    os_version = models.CharField(max_length=255, null=True)
+    browser = models.CharField(max_length=255, null=True)
+    browser_version = models.CharField(max_length=255, null=True)
+    device = models.CharField(max_length=255, null=True)
+    expiration_date = models.DateTimeField()
+    active = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column='user_id',
+        related_name='+'
+    )
+
+    class Meta:
+        db_table = 'session'
+
 
 class Watchlist(models.Model):
     name = models.CharField(max_length=255)
@@ -66,10 +92,10 @@ class Watchlist(models.Model):
         db_table = 'watchlist'
 
     def owner(self):
-        return UserHasWatchlist\
-            .objects\
-            .filter(watchlist=self, permission_id=1)\
-            .first()\
+        return UserHasWatchlist \
+            .objects \
+            .filter(watchlist=self, permission_id=1) \
+            .first() \
             .user
 
 

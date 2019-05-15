@@ -73,6 +73,7 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginResponseSerializer(serializers.Serializer):
     success = serializers.BooleanField()
     message = serializers.CharField()
+    token = serializers.CharField()
     user = UserSerializer()
 
     def update(self, instance, validated_data):
