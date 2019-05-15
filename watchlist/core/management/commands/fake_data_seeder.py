@@ -17,6 +17,7 @@ class Command(BaseCommand):
 
     def seed_users(self):
         admin = User()
+        admin.email = self.fake.email()
         admin.name = self.fake.name()
         admin.role_id = 1
         admin.picture = self.fake.image_url()
@@ -24,6 +25,7 @@ class Command(BaseCommand):
 
         for i in range(4):
             watcher = User()
+            watcher.email = self.fake.email()
             watcher.name = self.fake.name()
             watcher.role_id = 2
             watcher.picture = self.fake.image_url()
