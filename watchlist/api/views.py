@@ -51,8 +51,11 @@ class Auth(APIView):
         return Response(serializer.data)
 
     def _upsert_user(self, name, email, picture, token, auth_provider_id):
+        generate_def_list = False
+
         user = User.objects.filter(email=email).first()
         if user is None:
+            generate_def_list = True
             user = User()
 
         user.picture = picture
@@ -72,6 +75,19 @@ class Auth(APIView):
         credential.auth_provider_id = auth_provider_id
         credential.user_id = user.id
         credential.save()
+
+        # Generate default list?
+        if generate_def_list:
+            def_list = Watchlist()
+            def_list.name = "Mi lista"
+            def_list.is_default_list = True
+            def_list.save()
+
+            has_list = UserHasWatchlist()
+            has_list.watchlist = def_list
+            has_list.user = user
+            has_list.permission_id = 1
+            has_list.save()
 
         return user
 
