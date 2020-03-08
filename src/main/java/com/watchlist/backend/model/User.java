@@ -122,4 +122,12 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    public Collection<Session> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(Collection<Session> sessions) {
+        this.sessions = sessions;
+    }
 }
