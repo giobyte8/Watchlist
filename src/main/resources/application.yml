@@ -3,9 +3,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
-    url: jdbc:mysql://localhost:3306/jwatchlist
+    url: jdbc:mysql://localhost:3306/jwatchlist?userLegacyDatetimeCode=false
   jpa:
     hibernate:
       ddl-auto: create
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
 server:
   port: 8000
