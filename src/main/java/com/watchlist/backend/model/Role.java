@@ -8,6 +8,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "role")
 public class Role {
+    public static final int ADMIN = 1;
+    public static final int WATCHER = 2;
 
     @Id
     private long id;
