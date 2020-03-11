@@ -8,6 +8,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "auth_provider")
 public class AuthProvider {
+    public static final long FB_AUTH_PROVIDER = 1;
+    public static final long GO_AUTH_PROVIDER = 2;
 
     @Id
     private long id;

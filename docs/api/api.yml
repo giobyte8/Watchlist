@@ -9,7 +9,7 @@ servers:
     description: Development server
 
 paths:
-  /login:
+  /auth/login:
     post:
       summary: Verifies/Register the user credentials
       description: >
