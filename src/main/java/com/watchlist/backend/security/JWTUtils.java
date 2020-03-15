@@ -2,15 +2,11 @@ package com.watchlist.backend.security;
 
 import com.watchlist.backend.model.Session;
 import com.watchlist.backend.model.User;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class JWTUtils {
@@ -36,16 +32,39 @@ public class JWTUtils {
     }
 
     private String makeToken(long userId, String email, Date expiration) {
-        Map<String, Object> claims = new HashMap<>(2);
-        claims.put(USER_ID, userId);
-        claims.put(USER_EMAIL, email);
-
         JwtBuilder builder = Jwts.builder();
 
-        builder.setSubject(email)
+        builder.signWith(SignatureAlgorithm.HS256, secret)
+                .setSubject(email)
                 .setExpiration(expiration)
-                .setClaims(claims)
-                .signWith(SignatureAlgorithm.HS256, secret);
+                .claim(USER_ID, userId)
+                .claim(USER_EMAIL, email);
         return builder.compact();
+    }
+
+    public boolean isValid(String token) {
+        Jws<Claims> claims = parseClaims(token);
+
+        return claims.getBody()
+                .getExpiration()
+                .after(new Date());
+    }
+
+    public long getUserId(String token) {
+        return parseClaims(token)
+                .getBody()
+                .get(USER_ID, Long.class);
+    }
+
+    public String getUserEmail(String token) {
+        return parseClaims(token)
+                .getBody()
+                .get(USER_EMAIL, String.class);
+    }
+
+    private Jws<Claims> parseClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(token);
     }
 }
