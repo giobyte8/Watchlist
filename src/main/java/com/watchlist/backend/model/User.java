@@ -1,5 +1,7 @@
 package com.watchlist.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -28,6 +30,7 @@ public class User {
 
     @Column(name = "last_login")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date lastLogin;
 
     @Column(name = "created_at")
@@ -41,14 +44,17 @@ public class User {
     private Date updatedAt = new Date();
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private Collection<Credential> credentials;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private Collection<Session> sessions;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
     @NotNull
+    @JsonIgnore
     private Role role;
 
     public long getId() {

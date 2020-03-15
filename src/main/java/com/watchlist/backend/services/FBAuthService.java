@@ -2,14 +2,12 @@ package com.watchlist.backend.services;
 
 import com.watchlist.backend.clients.FBClient;
 import com.watchlist.backend.dao.CredentialDao;
+import com.watchlist.backend.dao.SessionDao;
 import com.watchlist.backend.dao.UserDao;
 import com.watchlist.backend.entities.LoginResponse;
 import com.watchlist.backend.entities.UserCredentials;
-import com.watchlist.backend.model.AuthProvider;
-import com.watchlist.backend.model.Credential;
-import com.watchlist.backend.model.Role;
-import com.watchlist.backend.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.watchlist.backend.model.*;
+import com.watchlist.backend.security.JWTUtils;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -21,13 +19,18 @@ public class FBAuthService implements AuthService {
     private final EntityManager entityManager;
     private final UserDao userDao;
     private final CredentialDao credentialDao;
+    private final JWTUtils jwtUtils;
+    private final SessionDao sessionDao;
 
-    public FBAuthService(FBClient fbClient, UserDao userDao,
-                         EntityManager entityManager, CredentialDao credentialDao) {
+    public FBAuthService(FBClient fbClient, EntityManager entityManager,
+                         UserDao userDao, CredentialDao credentialDao,
+                         SessionDao sessionDao, JWTUtils jwtUtils) {
         this.fbClient = fbClient;
         this.userDao = userDao;
         this.entityManager = entityManager;
         this.credentialDao = credentialDao;
+        this.jwtUtils = jwtUtils;
+        this.sessionDao = sessionDao;
     }
 
     @Override
@@ -65,10 +68,15 @@ public class FBAuthService implements AuthService {
             watchlistCredential.setToken(fbCredentials.getToken());
             credentialDao.save(watchlistCredential);
 
-            // TODO Create jwt and persist session started
+            //
+            // Persist session
+            Session session = jwtUtils.makeSessionFor(user);
+            sessionDao.save(session);
 
             loginResponse.setSuccess(true);
             loginResponse.setMessage("Login successful");
+            loginResponse.setJwt(session.getToken());
+            loginResponse.setUser(user);
         } else {
             loginResponse.setMessage("Provided token is invalid");
         }
