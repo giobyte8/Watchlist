@@ -1,5 +1,6 @@
-package com.watchlist.backend.security;
+package com.watchlist.backend.security.filters;
 
+import com.watchlist.backend.security.JWTUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -52,7 +53,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 if (jwtUtils.isValid(jwt)) {
 
                     return new UsernamePasswordAuthenticationToken(
-                            jwtUtils.getUserEmail(jwt),
+                            jwtUtils.getUserPrincipal(jwt),
                             jwt,
                             null
                     );

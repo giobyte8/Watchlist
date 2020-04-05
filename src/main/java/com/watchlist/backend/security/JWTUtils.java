@@ -50,6 +50,14 @@ public class JWTUtils {
                 .after(new Date());
     }
 
+    public UserPrincipal getUserPrincipal(String token) {
+        UserPrincipal principal = new UserPrincipal();
+        principal.setId(getUserId(token));
+        principal.setEmail(getUserEmail(token));
+
+        return principal;
+    }
+
     public long getUserId(String token) {
         return parseClaims(token)
                 .getBody()
