@@ -79,6 +79,5 @@ public class FBClientTest {
 
         // Then:
         Assert.assertFalse("Token should be invalid", verifyResult);
-        // TODO Assert that error was logged
     }
 }

@@ -1,6 +1,8 @@
 package com.watchlist.backend.clients;
 
 import com.watchlist.backend.entities.FBUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -11,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class FBClient {
+    private static final Logger log = LoggerFactory.getLogger(FBClient.class);
     private static final String BASE_URL = "https://graph.facebook.com/";
     private static final String PATH_ME = "me";
 
@@ -35,7 +38,7 @@ public class FBClient {
             }
         } catch (HttpClientErrorException | HttpServerErrorException |
                     UnknownHttpStatusCodeException e) {
-            // TODO Log error
+            log.error("Facebook token verification failed: {}", e.getMessage());
             return false;
         }
 
