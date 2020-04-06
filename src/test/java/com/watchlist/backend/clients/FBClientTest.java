@@ -17,7 +17,7 @@ public class FBClientTest {
 
     private FBClient fbClient;
 
-    @MockBean(name = "fbRestTemplate")
+    @MockBean
     private RestTemplate fbRestTemplate;
 
     @Before
