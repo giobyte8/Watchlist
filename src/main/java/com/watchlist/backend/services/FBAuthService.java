@@ -9,6 +9,7 @@ import com.watchlist.backend.entities.UserCredentials;
 import com.watchlist.backend.model.*;
 import com.watchlist.backend.security.JWTUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
@@ -33,6 +34,7 @@ public class FBAuthService implements AuthService {
         this.sessionDao = sessionDao;
     }
 
+    @Transactional
     @Override
     public LoginResponse login(UserCredentials fbCredentials) {
         LoginResponse loginResponse = new LoginResponse();
