@@ -14,8 +14,9 @@ import com.watchlist.backend.security.JWTUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -25,41 +26,34 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class FBAuthServiceTest {
 
-    @MockBean
+    @Mock
     private FBClient mockFBClient;
 
-    @MockBean
-    private EntityManager mockEntityManager;
-
-    @MockBean
+    @Mock
     private UserDao mockUserDao;
 
-    @MockBean
+    @Mock
+    private EntityManager mockEntityManager;
+
+    @Mock
     private CredentialDao mockCredentialDao;
 
-    @MockBean
-    private SessionDao mockSessionDao;
-
-    @MockBean
+    @Mock
     private JWTUtils mockJWTUtils;
 
+    @Mock
+    private SessionDao mockSessionDao;
+
+    @InjectMocks
     private FBAuthService fbAuthService;
+
     private UserCredentials testCredentials;
 
     @Before
     public void setup() {
-        fbAuthService = new FBAuthService(
-                mockFBClient,
-                mockEntityManager,
-                mockUserDao,
-                mockCredentialDao,
-                mockSessionDao,
-                mockJWTUtils
-        );
-
         testCredentials = new UserCredentials();
         testCredentials.setName("John Doe");
         testCredentials.setEmail("test@example.com");
