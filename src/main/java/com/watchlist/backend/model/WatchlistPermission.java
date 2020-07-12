@@ -9,6 +9,9 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "watchlist_permission")
 public class WatchlistPermission {
+    public static long OWNER_ID = 1;
+    public static long COLLABORATOR_ID = 2;
+    public static long FOLLOWER_ID = 3;
 
     @Id
     private long id;

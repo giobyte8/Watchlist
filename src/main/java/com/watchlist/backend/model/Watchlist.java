@@ -8,6 +8,7 @@ import java.util.Date;
 @Entity
 @Table(name = "watchlist")
 public class Watchlist {
+    public static final String DEFAULT_LIST_NAME = "Default list";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

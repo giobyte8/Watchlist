@@ -2,8 +2,9 @@ package com.watchlist.backend.controllers;
 
 import com.watchlist.backend.entities.LoginResponse;
 import com.watchlist.backend.entities.UserCredentials;
-import com.watchlist.backend.model.AuthProvider;
-import com.watchlist.backend.services.FBAuthService;
+import com.watchlist.backend.services.AuthService;
+import com.watchlist.backend.services.UserService;
+import com.watchlist.backend.services.WatchlistService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,21 +14,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("auth")
 public class AuthController {
 
-    private final FBAuthService fbAuthService;
+    private final AuthService authService;
+    private final UserService userService;
+    private final WatchlistService watchlistService;
 
-    public AuthController(FBAuthService fbAuthService) {
-        this.fbAuthService = fbAuthService;
+    public AuthController(AuthService authService, UserService userService,
+                          WatchlistService watchlistService) {
+        this.authService = authService;
+        this.userService = userService;
+        this.watchlistService = watchlistService;
     }
 
     @PostMapping("login")
     public LoginResponse login(@RequestBody UserCredentials credentials) {
-        LoginResponse response;
+        LoginResponse response = new LoginResponse();
 
-        if (credentials.getAuthProviderId() == AuthProvider.FB_AUTH_PROVIDER) {
-            response = fbAuthService.login(credentials);
+        if (authService.authenticate(credentials)) {
+            userService.upsertWatcher(credentials, watchlistService, response);
+
+            response.setSuccess(true);
+            response.setMessage("Login successful");
         } else {
-            response = new LoginResponse();
-            response.setMessage("Unsupported auth provider");
+            response.setMessage("Provided token or email is invalid");
         }
 
         return response;
