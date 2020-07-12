@@ -1,8 +1,20 @@
 openapi: 3.0.0
 info:
   title: Watchlist API
-  description: Watchlist restful API
   version: "1.0"
+  description: >-
+    Openapi documentation for endpoints being exposed by watchlist
+
+    ### About authentication
+
+    Every endpoint listed below (except `auth/login`) must be invoked using
+    http basic auth through a request header like `Authorization: Bearer <token>`.
+
+    In order to get a valid token you must first make a request to the
+    `auth/login` endpoint using a valid facebook token, you can get one
+    for development at
+    [https://developers.facebook.com/tools/explorer/](https://developers.facebook.com/tools/explorer/)
+    and by clicking the `Generate token` button
 
 servers:
   - url: http:localhost:8081/api
@@ -14,7 +26,7 @@ paths:
       tags:
       - Authorization
       summary: Authenticates/Registers a user
-      description: >
+      description: >-
         Validates provided oauth token for indicated auth provider, then
         if there's no user with provided email, it will be registered as a new
         user. Finally a jwt and a user object will be returned as response

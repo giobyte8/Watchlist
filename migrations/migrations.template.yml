@@ -1,0 +1,9 @@
+datasource:
+  host: <host>
+  username: <username>
+  password: <place your own password here>
+  database: <database name>
+
+migrations_path:
+  up: <migrations path>
+  down: <rollback sql scripts path>

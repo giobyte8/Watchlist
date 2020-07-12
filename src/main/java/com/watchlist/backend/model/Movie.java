@@ -13,9 +13,9 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
     @Column(name = "tmdb_id")
-    private long tmdbId;
+    @NotNull
+    private int tmdbId;
 
     @NotNull
     @Size(max = 255)
@@ -38,7 +38,7 @@ public class Movie {
     private String synopsis;
 
     @NotNull
-    private float rating;
+    private double rating;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -58,11 +58,11 @@ public class Movie {
         this.id = id;
     }
 
-    public long getTmdbId() {
+    public int getTmdbId() {
         return tmdbId;
     }
 
-    public void setTmdbId(long tmdbId) {
+    public void setTmdbId(int tmdbId) {
         this.tmdbId = tmdbId;
     }
 
@@ -106,11 +106,11 @@ public class Movie {
         this.synopsis = synopsis;
     }
 
-    public float getRating() {
+    public @NotNull double getRating() {
         return rating;
     }
 
-    public void setRating(float rating) {
+    public void setRating(@NotNull double rating) {
         this.rating = rating;
     }
 
