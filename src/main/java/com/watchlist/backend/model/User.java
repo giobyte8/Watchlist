@@ -57,6 +57,15 @@ public class User {
     @JsonIgnore
     private Role role;
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_has_watchlist",
+            joinColumns = { @JoinColumn(name = "user_id") },
+            inverseJoinColumns = { @JoinColumn(name = "watchlist_id") }
+    )
+    @JsonIgnore
+    private Collection<Watchlist> watchlists;
+
     public long getId() {
         return id;
     }
@@ -135,5 +144,13 @@ public class User {
 
     public void setSessions(Collection<Session> sessions) {
         this.sessions = sessions;
+    }
+
+    public Collection<Watchlist> getWatchlists() {
+        return watchlists;
+    }
+
+    public void setWatchlists(Collection<Watchlist> watchlists) {
+        this.watchlists = watchlists;
     }
 }

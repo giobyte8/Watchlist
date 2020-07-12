@@ -29,7 +29,6 @@ public class UserHasWatchlist {
 
     @ManyToOne
     @JoinColumn(name = "shared_by")
-    @NotNull
     private User sharedBy;
 
     @ManyToOne

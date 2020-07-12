@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -133,5 +135,10 @@ public class UserService {
         }
         storedCredential.setToken(token);
         credentialDao.save(storedCredential);
+    }
+
+    public Collection<Watchlist> getLists(long userId) {
+        Optional<User> user = userDao.findById(userId);
+        return user.map(User::getWatchlists).orElse(null);
     }
 }
