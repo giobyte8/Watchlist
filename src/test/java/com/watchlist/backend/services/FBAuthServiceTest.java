@@ -1,51 +1,26 @@
 package com.watchlist.backend.services;
 
 import com.watchlist.backend.clients.FBClient;
-import com.watchlist.backend.dao.CredentialDao;
-import com.watchlist.backend.dao.SessionDao;
-import com.watchlist.backend.dao.UserDao;
-import com.watchlist.backend.entities.LoginResponse;
 import com.watchlist.backend.entities.UserCredentials;
+import com.watchlist.backend.exceptions.WrongAuthProviderException;
 import com.watchlist.backend.model.AuthProvider;
-import com.watchlist.backend.model.Role;
-import com.watchlist.backend.model.Session;
-import com.watchlist.backend.model.User;
-import com.watchlist.backend.security.JWTUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FBAuthServiceTest {
 
     @Mock
-    private FBClient mockFBClient;
-
-    @Mock
-    private UserDao mockUserDao;
-
-    @Mock
-    private EntityManager mockEntityManager;
-
-    @Mock
-    private CredentialDao mockCredentialDao;
-
-    @Mock
-    private JWTUtils mockJWTUtils;
-
-    @Mock
-    private SessionDao mockSessionDao;
+    private FBClient mFBClient;
 
     @InjectMocks
     private FBAuthService fbAuthService;
@@ -62,51 +37,68 @@ public class FBAuthServiceTest {
     }
 
     @Test
-    public void loginWithRightToken() {
-        Role watcher = new Role();
-        watcher.setId(Role.WATCHER);
+    public void testRightToken() {
 
-        AuthProvider fbAuthProvider = new AuthProvider();
-        fbAuthProvider.setId(AuthProvider.FB_AUTH_PROVIDER);
+        // Given
+        testCredentials.setAuthProviderId(AuthProvider.FB_AUTH_PROVIDER);
 
-        Session fakeSession = new Session();
-        fakeSession.setExpiration(new Date());
-        fakeSession.setToken("gen_token_123");
-        fakeSession.setUser(new User());
-
-        when(mockFBClient.verifyToken(testCredentials.getEmail(), testCredentials.getToken()))
+        // When
+        Mockito
+                .when(mFBClient.verifyToken(
+                        testCredentials.getEmail(),
+                        testCredentials.getToken()
+                ))
                 .thenReturn(true);
-        when(mockEntityManager.getReference(Role.class, Role.WATCHER))
-                .thenReturn(watcher);
-        when(mockEntityManager.getReference(AuthProvider.class, AuthProvider.FB_AUTH_PROVIDER))
-                .thenReturn(fbAuthProvider);
-        when(mockJWTUtils.makeSessionFor(any(User.class)))
-                .thenReturn(fakeSession);
+        boolean loginResult = fbAuthService.authenticate(testCredentials);
 
-        LoginResponse loginResponse = fbAuthService.login(testCredentials);
-
-        verify(mockUserDao, times(1)).save(argThat(user ->
-                user.getName().equals(testCredentials.getName()) &&
-                        user.getEmail().equals(testCredentials.getEmail()) &&
-                        user.getRole().equals(watcher)
-                ));
-        verify(mockCredentialDao, times(1)).save(argThat(credential ->
-                credential.getAuthProvider().equals(fbAuthProvider) &&
-                        credential.getUser().getEmail().equals(testCredentials.getEmail()) &&
-                        credential.getToken().equals(testCredentials.getToken())
-                ));
-        verify(mockSessionDao, times(1)).save(
-                argThat(session -> session.equals(fakeSession)));
-
-        assertTrue("Login should be successful", loginResponse.isSuccess());
+        // Then
+        Mockito
+                .verify(mFBClient, times(1))
+                .verifyToken(
+                        testCredentials.getEmail(),
+                        testCredentials.getToken()
+                );
+        assertTrue(
+                "Login result should be successful",
+                loginResult
+        );
     }
 
     @Test
-    public void loginWithWrongToken() {
-        when(mockFBClient.verifyToken(testCredentials.getEmail(), testCredentials.getToken()))
-                .thenReturn(false);
+    public void testWrongToken() {
 
-        LoginResponse loginResponse = fbAuthService.login(testCredentials);
-        assertFalse("Login should be unsuccessful", loginResponse.isSuccess());
+        // Given
+        testCredentials.setAuthProviderId(AuthProvider.FB_AUTH_PROVIDER);
+
+        // When
+        Mockito
+                .when(mFBClient.verifyToken(
+                    testCredentials.getEmail(),
+                    testCredentials.getToken()
+                ))
+                .thenReturn(false);
+        boolean loginResult = fbAuthService.authenticate(testCredentials);
+
+        // Then
+        Mockito
+                .verify(mFBClient, times(1))
+                .verifyToken(
+                        testCredentials.getEmail(),
+                        testCredentials.getToken()
+                );
+        assertFalse(
+                "Login result should be unsuccessful",
+                loginResult
+        );
+    }
+
+    @Test(expected = WrongAuthProviderException.class)
+    public void testWrongAuthProviderId() {
+
+        // Given
+        testCredentials.setAuthProviderId(AuthProvider.GO_AUTH_PROVIDER);
+        fbAuthService.authenticate(testCredentials);
+
+        // Then exception should be thrown
     }
 }

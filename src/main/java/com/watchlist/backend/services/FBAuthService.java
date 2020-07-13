@@ -2,6 +2,7 @@ package com.watchlist.backend.services;
 
 import com.watchlist.backend.clients.FBClient;
 import com.watchlist.backend.entities.UserCredentials;
+import com.watchlist.backend.exceptions.WrongAuthProviderException;
 import com.watchlist.backend.model.AuthProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +20,11 @@ public class FBAuthService implements AuthService {
     @Override
     public boolean authenticate(UserCredentials credentials) {
         if (credentials.getAuthProviderId() != AuthProvider.FB_AUTH_PROVIDER) {
-            // TODO Launch custom unsupported exception
-            return false;
+            throw new WrongAuthProviderException(String.format(
+                    "%s can't be used with auth provider id: %d",
+                    getClass().getName(),
+                    credentials.getAuthProviderId()
+            ));
         }
 
         return fbClient.verifyToken(
