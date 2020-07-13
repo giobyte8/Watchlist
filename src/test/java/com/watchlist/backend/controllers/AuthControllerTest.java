@@ -2,11 +2,16 @@ package com.watchlist.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.entities.LoginResponse;
+import com.watchlist.backend.entities.UserCredentials;
+import com.watchlist.backend.exceptions.WrongAuthProviderException;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.FBAuthService;
+import com.watchlist.backend.services.UserService;
+import com.watchlist.backend.services.WatchlistService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,15 +23,20 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AuthController.class)
-@MockBean({ RestTemplate.class, JWTUtils.class })
+@MockBean({
+        WatchlistService.class,
+        JWTUtils.class,
+        RestTemplate.class
+})
 public class AuthControllerTest {
 
     @Autowired
@@ -37,6 +47,9 @@ public class AuthControllerTest {
 
     @MockBean
     private FBAuthService fbAuthService;
+
+    @MockBean
+    private UserService userService;
 
     private String jCredentials;
 
@@ -52,25 +65,17 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void loginSuccessful() throws Exception {
+    public void testLoginSuccessful() throws Exception {
 
-        //
-        // Given
-        LoginResponse loginSuccessful = new LoginResponse();
-        loginSuccessful.setSuccess(true);
-
-
-        //
         // When
-        when(fbAuthService.login(argThat(userCredentials ->
-                        userCredentials.getName().equals("John Doe") &&
-                                userCredentials.getAuthProviderId() == 1L &&
-                                userCredentials.getToken().equals("12345")
-                )))
-                .thenReturn(loginSuccessful);
+        Mockito
+            .when(fbAuthService.authenticate(argThat(userCredentials ->
+                    userCredentials.getName().equals("John Doe") &&
+                            userCredentials.getAuthProviderId() == 1L &&
+                            userCredentials.getToken().equals("12345")
+            )))
+            .thenReturn(true);
 
-        //
-        // Then:
         MvcResult mvcResult = mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jCredentials))
@@ -78,11 +83,20 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("$.success").isBoolean())
                 .andReturn();
 
+        // Then
         String result = mvcResult.getResponse().getContentAsString();
         LoginResponse receivedResponse = objectMapper.readValue(
                 result,
-                LoginResponse.class);
+                LoginResponse.class
+        );
 
+        Mockito
+                .verify(userService, times(1))
+                .upsertWatcher(
+                        any(UserCredentials.class),
+                        any(WatchlistService.class),
+                        any(LoginResponse.class)
+                );
         assertTrue(
                 "Login should be successful",
                 receivedResponse.isSuccess());
@@ -91,34 +105,56 @@ public class AuthControllerTest {
     @Test
     public void loginUnsuccessful() throws Exception {
 
-        //
-        // Given
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setSuccess(false);
-
-        //
         // When
-        when(fbAuthService.login(
-                argThat(credentials -> credentials.getToken().equals("12345"))
-            ))
-            .thenReturn(loginResponse);
+        Mockito
+            .when(fbAuthService.authenticate(argThat(credentials ->
+                    credentials.getToken().equals("12345")
+            )))
+            .thenReturn(false);
 
-        //
-        // Then:
         MvcResult mvcResult = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jCredentials))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jCredentials))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").isBoolean())
                 .andReturn();
 
+        // Then
         String result = mvcResult.getResponse().getContentAsString();
         LoginResponse receivedResponse = objectMapper.readValue(
                 result,
-                LoginResponse.class);
+                LoginResponse.class
+        );
 
+        Mockito
+                .verify(userService, Mockito.never())
+                .upsertWatcher(
+                        any(UserCredentials.class),
+                        any(WatchlistService.class),
+                        any(LoginResponse.class)
+                );
         assertFalse(
                 "Login should be unsuccessful",
                 receivedResponse.isSuccess());
+    }
+
+    @Test
+    public void testWrongAuthProviderId() throws Exception {
+
+        // When
+        Mockito
+
+                // Since auth service has been mocked, we must force
+                // the exception thrown manually
+                .doThrow(WrongAuthProviderException.class)
+                .when(fbAuthService)
+                .authenticate(any(UserCredentials.class));
+
+        // Then
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jCredentials))
+                .andExpect(status().is4xxClientError())
+                .andReturn();
     }
 }
