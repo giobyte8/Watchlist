@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "watchlist")
@@ -34,6 +35,15 @@ public class Watchlist {
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     private Date updatedAt = new Date();
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Watchlist)) return false;
+
+        Watchlist watchlist = (Watchlist) obj;
+        return Objects.equals(this.getId(), watchlist.getId());
+    }
 
     public long getId() {
         return id;
