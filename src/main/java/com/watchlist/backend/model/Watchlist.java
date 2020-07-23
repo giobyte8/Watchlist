@@ -1,6 +1,7 @@
 package com.watchlist.backend.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -15,7 +16,7 @@ public class Watchlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
+    @NotBlank
     @Size(max = 255)
     private String name;
 

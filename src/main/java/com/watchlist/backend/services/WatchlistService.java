@@ -45,4 +45,31 @@ public class WatchlistService {
         hasWatchlist.setPermission(ownerPermission);
         userHasWatchlistDao.save(hasWatchlist);
     }
+
+    /**
+     * Persists watchlist and sets provided user
+     * as the owner of list
+     * @param watchlist List to save/create
+     * @param userId Owner of list
+     */
+    @Transactional
+    public void create(Watchlist watchlist, long userId) {
+        watchlistDao.save(watchlist);
+
+        WatchlistPermission ownerPermission = entityManager.getReference(
+                WatchlistPermission.class,
+                WatchlistPermission.OWNER_ID
+        );
+
+        User owner = entityManager.getReference(
+                User.class,
+                userId
+        );
+
+        UserHasWatchlist hasWatchlist = new UserHasWatchlist();
+        hasWatchlist.setUser(owner);
+        hasWatchlist.setWatchlist(watchlist);
+        hasWatchlist.setPermission(ownerPermission);
+        userHasWatchlistDao.save(hasWatchlist);
+    }
 }

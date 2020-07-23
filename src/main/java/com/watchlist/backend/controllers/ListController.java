@@ -3,12 +3,10 @@ package com.watchlist.backend.controllers;
 import com.watchlist.backend.exceptions.ProvidedUserIdNotFoundException;
 import com.watchlist.backend.model.Watchlist;
 import com.watchlist.backend.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.watchlist.backend.services.WatchlistService;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -16,9 +14,12 @@ import java.util.Collection;
 public class ListController {
 
     private final UserService userService;
+    private final WatchlistService watchlistService;
 
-    public ListController(UserService userService) {
+    public ListController(UserService userService,
+                          WatchlistService watchlistService) {
         this.userService = userService;
+        this.watchlistService = watchlistService;
     }
 
     @GetMapping("{userId}/lists")
@@ -30,5 +31,12 @@ public class ListController {
         }
 
         return watchlists;
+    }
+
+    @PostMapping("{userId}/lists")
+    public Watchlist create(@PathVariable long userId,
+                            @Valid @RequestBody Watchlist watchlist) {
+        watchlistService.create(watchlist, userId);
+        return watchlist;
     }
 }
