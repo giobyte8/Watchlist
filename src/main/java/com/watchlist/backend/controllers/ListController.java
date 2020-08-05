@@ -1,5 +1,6 @@
 package com.watchlist.backend.controllers;
 
+import com.watchlist.backend.exceptions.NonUniqueWatchlistNameForUserException;
 import com.watchlist.backend.exceptions.ProvidedUserIdNotFoundException;
 import com.watchlist.backend.model.Watchlist;
 import com.watchlist.backend.services.UserService;
@@ -14,12 +15,12 @@ import java.util.Collection;
 public class ListController {
 
     private final UserService userService;
-    private final WatchlistService watchlistService;
+    private final WatchlistService watchlistSvc;
 
     public ListController(UserService userService,
-                          WatchlistService watchlistService) {
+                          WatchlistService watchlistSvc) {
         this.userService = userService;
-        this.watchlistService = watchlistService;
+        this.watchlistSvc = watchlistSvc;
     }
 
     @GetMapping("{userId}/lists")
@@ -36,7 +37,15 @@ public class ListController {
     @PostMapping("{userId}/lists")
     public Watchlist create(@PathVariable long userId,
                             @Valid @RequestBody Watchlist watchlist) {
-        watchlistService.create(watchlist, userId);
+        if (!userService.userExists(userId)) {
+            throw new ProvidedUserIdNotFoundException();
+        }
+
+        if (watchlistSvc.existsByNameAndOwner(watchlist.getName(), userId)) {
+            throw new NonUniqueWatchlistNameForUserException();
+        }
+
+        watchlistSvc.create(watchlist, userId);
         return watchlist;
     }
 }

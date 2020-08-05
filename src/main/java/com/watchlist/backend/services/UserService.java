@@ -137,6 +137,10 @@ public class UserService {
         credentialDao.save(storedCredential);
     }
 
+    public boolean userExists(long userId) {
+        return userDao.existsById(userId);
+    }
+
     public Collection<Watchlist> getLists(long userId) {
         Optional<User> user = userDao.findById(userId);
         return user.map(User::getWatchlists).orElse(null);
