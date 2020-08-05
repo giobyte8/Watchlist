@@ -1,15 +1,14 @@
 package com.watchlist.backend.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
 import com.watchlist.backend.model.Watchlist;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.UserService;
 import com.watchlist.backend.services.WatchlistService;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,6 @@ import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -130,17 +128,24 @@ public class ListControllerTest {
 
     @Test
     public void testCreate() throws Exception {
+        String listName = "Western";
+
         Watchlist watchlist = new Watchlist();
-        watchlist.setName("Western");
+        watchlist.setName(listName);
 
         long userId = 101L;
 
-        MockHttpServletRequestBuilder reqBuilder = post(
-                    "/user/{userId}/lists",
-                    userId
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(watchlist));
+        Mockito
+                .when(userService.userExists(userId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistService.existsByNameAndOwner(listName, userId))
+                .thenReturn(false);
+
+        MockHttpServletRequestBuilder reqBuilder = createReqBuilder(
+                watchlist,
+                userId
+        );
 
         MvcResult mvcResult = mockMvc.perform(reqBuilder)
                 .andExpect(status().is2xxSuccessful())
@@ -181,6 +186,62 @@ public class ListControllerTest {
         verifyValidationError(watchlist);
     }
 
+    @Test
+    public void testCreateForNonExistentUser() throws Exception {
+        Watchlist watchlist = new Watchlist();
+        watchlist.setName("Western");
+
+        long userId = 101L;
+
+        Mockito
+                .when(userService.userExists(userId))
+                .thenReturn(false);
+
+        MockHttpServletRequestBuilder reqBuilder = createReqBuilder(
+                watchlist,
+                userId
+        );
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testCreateNonUniqueWatchlist() throws Exception {
+        String listName = "Western";
+        Watchlist watchlist = new Watchlist();
+        watchlist.setName(listName);
+
+        long userId = 101L;
+
+        Mockito
+                .when(userService.userExists(userId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistService.existsByNameAndOwner(listName, userId))
+                .thenReturn(true);
+
+        MockHttpServletRequestBuilder reqBuilder = createReqBuilder(
+                watchlist,
+                userId
+        );
+        verifyValidationError(reqBuilder);
+    }
+
+    private MockHttpServletRequestBuilder createReqBuilder(Watchlist watchlist,
+                                                           long userId)
+            throws JsonProcessingException {
+        MockHttpServletRequestBuilder reqBuilder = post(
+                "/user/{userId}/lists",
+                userId
+        );
+
+        reqBuilder
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(watchlist));
+        return reqBuilder;
+    }
+
     private void verifyValidationError(Watchlist watchlist) throws Exception {
         MockHttpServletRequestBuilder reqBuilder = post(
                     "/user/{userId}/lists",
@@ -189,8 +250,13 @@ public class ListControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(watchlist));
 
+        verifyValidationError(reqBuilder);
+    }
+
+    private void verifyValidationError(MockHttpServletRequestBuilder reqBuilder)
+            throws Exception {
         mockMvc.perform(reqBuilder)
-                .andExpect(status().is4xxClientError())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").isString())
                 .andExpect(jsonPath("$.errors").isArray());
     }
