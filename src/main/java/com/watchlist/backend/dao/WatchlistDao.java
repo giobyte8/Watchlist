@@ -15,7 +15,7 @@ public interface WatchlistDao extends CrudRepository<Watchlist, Long> {
      * @param ownerId Id of list owner
      * @return true if a list already exists
      */
-    @Query(value = "SELECT (1=1) " +
+    @Query(value = "SELECT (count(w) > 0) " +
             "FROM UserHasWatchlist uhw " +
             "INNER JOIN uhw.watchlist w " +
             "WHERE uhw.user.id = :ownerId AND w.name = :name")
