@@ -30,7 +30,6 @@ public class WatchlistServiceTest {
     @Mock
     private UserHasWatchlistDao hasWatchlistDao;
 
-    @SuppressWarnings("unused")
     @Mock
     private EntityManager entityManager;
 
