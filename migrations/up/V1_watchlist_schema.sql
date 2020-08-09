@@ -132,21 +132,25 @@ CREATE TABLE picture(
     FOREIGN KEY (picture_category_id) REFERENCES picture_category(id)
 );
 
-CREATE TABLE crew_category(
+CREATE TABLE `cast`(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(500) NOT NULL,
+    `character` VARCHAR(500),
+    picture_url VARCHAR(5000),
+    movie_id BIGINT NOT NULL,
+
+    FOREIGN KEY (movie_id) REFERENCES movie(id)
 );
 
 CREATE TABLE crew(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(500) NOT NULL,
-    character_name VARCHAR(500) NOT NULL,
+    job VARCHAR(255) NOT NULL,
+    department VARCHAR(255),
     picture_url VARCHAR(5000),
     movie_id BIGINT NOT NULL,
-    crew_category_id BIGINT NOT NULL,
 
-    FOREIGN KEY (movie_id) REFERENCES movie(id),
-    FOREIGN KEY (crew_category_id) REFERENCES crew_category(id)
+    FOREIGN KEY (movie_id) REFERENCES movie(id)
 );
 
 

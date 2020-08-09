@@ -6,8 +6,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "crew")
-public class Crew {
+@Table(name = "cast")
+public class Cast {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,9 +17,8 @@ public class Crew {
     @NotBlank
     private String name;
 
-    @Size(max = 255)
-    @NotBlank
-    private String job;
+    @Size(max = 500)
+    private String character;
 
     @Size(max = 255)
     private String department;
@@ -49,12 +48,12 @@ public class Crew {
         this.name = name;
     }
 
-    public String getJob() {
-        return job;
+    public String getCharacter() {
+        return character;
     }
 
-    public void setJob(String job) {
-        this.job = job;
+    public void setCharacter(String character) {
+        this.character = character;
     }
 
     public String getDepartment() {

@@ -1,7 +1,7 @@
 
 DROP TABLE IF EXISTS
     crew,
-    crew_category,
+    `cast`,
     picture,
     picture_category,
     movie_has_genre,

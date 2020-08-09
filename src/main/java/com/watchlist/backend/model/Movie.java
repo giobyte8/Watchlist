@@ -1,9 +1,11 @@
 package com.watchlist.backend.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "movie")
@@ -17,11 +19,11 @@ public class Movie {
     @NotNull
     private int tmdbId;
 
-    @NotNull
+    @NotBlank
     @Size(max = 255)
     private String title;
 
-    @NotNull
+    @NotBlank
     @Size(max = 255)
     @Column(name = "original_title")
     private String originalTitle;
@@ -33,7 +35,6 @@ public class Movie {
     @NotNull
     private int runtime;
 
-    @NotNull
     @Size(max = 5000)
     private String synopsis;
 
@@ -49,6 +50,23 @@ public class Movie {
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     private Date updatedAt = new Date();
+
+    @OneToMany(mappedBy = "movie")
+    private List<Picture> pictures;
+
+    @OneToMany(mappedBy = "movie")
+    private List<Crew> crew;
+
+    @OneToMany(mappedBy = "movie")
+    private List<Cast> cast;
+
+    @ManyToMany
+    @JoinTable(
+            name = "movie_has_genre",
+            joinColumns = { @JoinColumn(name = "movie_id") },
+            inverseJoinColumns = { @JoinColumn(name = "genre_id") }
+    )
+    private List<Genre> genres;
 
     public long getId() {
         return id;
@@ -128,5 +146,37 @@ public class Movie {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<Crew> getCrew() {
+        return crew;
+    }
+
+    public void setCrew(List<Crew> crew) {
+        this.crew = crew;
+    }
+
+    public List<Cast> getCast() {
+        return cast;
+    }
+
+    public void setCast(List<Cast> cast) {
+        this.cast = cast;
+    }
+
+    public List<Picture> getPictures() {
+        return pictures;
+    }
+
+    public void setPictures(List<Picture> pictures) {
+        this.pictures = pictures;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
     }
 }

@@ -379,6 +379,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Picture'
+        cast:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cast'
+        crew:
+          type: array
+          items:
+            $ref: '#/components/schemas/Crew'
 
     MoviePost:
       type: object
@@ -387,6 +395,42 @@ components:
           type: integer
           format: int32
         added_by:
+          type: integer
+          format: int32
+
+    Cast:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        character:
+          type: string
+        picture_url:
+          type: string
+          format: url
+        movie_id:
+          type: integer
+          format: int32
+
+    Crew:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        job:
+          type: string
+        department:
+          type: string
+        picture_url:
+          type: string
+          format: url
+        movie_id:
           type: integer
           format: int32
 
