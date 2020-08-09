@@ -73,6 +73,10 @@ public class WatchlistService {
         userHasWatchlistDao.save(hasWatchlist);
     }
 
+    public boolean exists(long watchlistId) {
+        return watchlistDao.existsById(watchlistId);
+    }
+
     /**
      * Verifies if a watchlist with given name an under
      * ownership of indicated user already exists
