@@ -68,6 +68,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Watchlist'
+        '403':
+          description: Current user can not access indicated user lists
+        '404':
+          description: Given user id does not exists
     post:
       tags:
       - Lists
@@ -106,12 +110,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
+        '403':
+          description: Unauthorized, current user can not modify indicated user lists
+        '404':
+          description: Given user id does not exists
 
   /lists/{listId}/movies:
     get:
       tags:
       - List's content
-      summary: Retrieves the contents of specified list
+      summary: Retrieves content of specified list
       parameters:
       - name: id
         in: path
@@ -129,6 +137,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WatchlistHasMovie'
+        '403':
+          description: Unauthorized, current user can not access watchlist
+        '404':
+          description: Indicated watchlist does not exists
     post:
       tags:
       - List's content
@@ -160,6 +172,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WatchlistHasMovie'
+        '403':
+          description: Unauthorized, current user can not access watchlist
+        '404':
+          description: Indicated watchlist does not exists
         '409':
           description: Conflict, provided movie id is already in this list
           content:
@@ -200,6 +216,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Element does not exists
     delete:
       tags:
       - List's content
@@ -228,6 +246,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Element does not exists
 
 components:
   schemas:
