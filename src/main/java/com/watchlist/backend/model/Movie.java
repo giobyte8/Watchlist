@@ -41,6 +41,12 @@ public class Movie {
     @NotNull
     private double rating;
 
+    @Column(name = "poster_path")
+    private String posterPath;
+
+    @Column(name = "backdrop_path")
+    private String backdropPath;
+
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
@@ -50,9 +56,6 @@ public class Movie {
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     private Date updatedAt = new Date();
-
-    @OneToMany(mappedBy = "movie")
-    private List<Picture> pictures;
 
     @OneToMany(mappedBy = "movie")
     private List<Crew> crew;
@@ -132,6 +135,30 @@ public class Movie {
         this.rating = rating;
     }
 
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -164,19 +191,4 @@ public class Movie {
         this.cast = cast;
     }
 
-    public List<Picture> getPictures() {
-        return pictures;
-    }
-
-    public void setPictures(List<Picture> pictures) {
-        this.pictures = pictures;
-    }
-
-    public List<Genre> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(List<Genre> genres) {
-        this.genres = genres;
-    }
 }

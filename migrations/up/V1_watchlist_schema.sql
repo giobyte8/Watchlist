@@ -86,6 +86,8 @@ CREATE TABLE movie(
     runtime INT NOT NULL,
     synopsis VARCHAR(5000) NOT NULL,
     rating DOUBLE NOT NULL,
+    poster_path VARCHAR(2000),
+    backdrop_path VARCHAR(2000),
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
 );
@@ -115,21 +117,6 @@ CREATE TABLE movie_has_genre(
 
     FOREIGN KEY (movie_id) REFERENCES movie(id),
     FOREIGN KEY (genre_id) REFERENCES genre(id)
-);
-
-CREATE TABLE picture_category(
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE picture(
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    url VARCHAR(5000) NOT NULL,
-    movie_id BIGINT NOT NULL,
-    picture_category_id BIGINT NOT NULL,
-
-    FOREIGN KEY (movie_id) REFERENCES movie(id),
-    FOREIGN KEY (picture_category_id) REFERENCES picture_category(id)
 );
 
 CREATE TABLE `cast`(
