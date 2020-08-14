@@ -20,6 +20,7 @@
 		<mysql-connector.version>8.0.18</mysql-connector.version>
 		<junit.version>4.12</junit.version>
 		<io.jsonwebtoken.version>0.9.1</io.jsonwebtoken.version>
+		<tmdb-java.version>2.2.0</tmdb-java.version>
 	</properties>
 
 	<dependencies>
@@ -44,6 +45,11 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
 			<version>${io.jsonwebtoken.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.uwetrottmann.tmdb2</groupId>
+			<artifactId>tmdb-java</artifactId>
+			<version>${tmdb-java.version}</version>
 		</dependency>
 
 		<dependency>

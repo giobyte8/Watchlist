@@ -4,3 +4,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+
+watchlist:
+  tmdb-api-key: b05e87f356ef223c5aeacf0bcae54d04

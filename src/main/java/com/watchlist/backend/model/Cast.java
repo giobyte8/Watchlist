@@ -20,9 +20,6 @@ public class Cast {
     @Size(max = 500)
     private String character;
 
-    @Size(max = 255)
-    private String department;
-
     @Column(name = "picture_url")
     @Size(max = 5000)
     private String pictureUrl;
@@ -54,14 +51,6 @@ public class Cast {
 
     public void setCharacter(String character) {
         this.character = character;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
     }
 
     public String getPictureUrl() {

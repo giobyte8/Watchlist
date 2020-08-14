@@ -1,18 +1,18 @@
 package com.watchlist.backend.controllers;
 
+import com.watchlist.backend.entities.MoviePost;
+import com.watchlist.backend.exceptions.DuplicatedWatchlistMovieException;
 import com.watchlist.backend.exceptions.WatchlistNotFoundException;
 import com.watchlist.backend.model.WatchlistHasMovie;
 import com.watchlist.backend.services.WatchlistMovieService;
 import com.watchlist.backend.services.WatchlistService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("list/{listId}/movies")
+@RequestMapping("lists/{listId}/movies")
 public class WatchlistMovieController {
 
     private final WatchlistService watchlistService;
@@ -31,5 +31,21 @@ public class WatchlistMovieController {
         }
 
         return watchlistMovieService.getMovies(listId);
+    }
+
+    @PostMapping
+    public WatchlistHasMovie addMovie(@PathVariable long listId,
+                                      @Valid @RequestBody MoviePost moviePost) {
+        if (!watchlistService.exists(listId)) {
+            throw new WatchlistNotFoundException();
+        }
+
+        if (watchlistMovieService.existsByWatchlistAndTmdbId(
+                listId,
+                moviePost.getTmdbId())) {
+            throw new DuplicatedWatchlistMovieException();
+        }
+
+        return watchlistMovieService.addMovie(listId, moviePost);
     }
 }

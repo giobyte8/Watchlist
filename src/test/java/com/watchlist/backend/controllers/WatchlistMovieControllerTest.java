@@ -1,7 +1,9 @@
 package com.watchlist.backend.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
+import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.model.WatchlistHasMovie;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.WatchlistMovieService;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -24,6 +27,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -62,7 +69,7 @@ public class WatchlistMovieControllerTest {
                 .thenReturn(hasMovies);
 
         MockHttpServletRequestBuilder reqBuilder = MockMvcRequestBuilders.get(
-                "/list/{listId}/movies",
+                "/lists/{listId}/movies",
                 watchlistId
         );
         MvcResult mvcResult = mockMvc
@@ -85,12 +92,142 @@ public class WatchlistMovieControllerTest {
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = MockMvcRequestBuilders.get(
-                "/list/{listId}/movies",
+                "/lists/{listId}/movies",
                 watchlistId
         );
         mockMvc
                 .perform(reqBuilder)
                 .andExpect(status().isNotFound());
 
+    }
+
+    @Test
+    public void testAddMovie() throws Exception {
+        long listId = 1;
+        int tmdbId = 104;
+        long hasMovieId = 50001;
+
+        MoviePost moviePost = new MoviePost();
+        moviePost.setAddedBy(1);
+        moviePost.setTmdbId(tmdbId);
+
+        WatchlistHasMovie hasMovie = new WatchlistHasMovie();
+        hasMovie.setId(hasMovieId);
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.existsByWatchlistAndTmdbId(
+                        listId,
+                        tmdbId
+                ))
+                .thenReturn(false);
+        Mockito
+                .when(watchlistMovieService.addMovie(
+                        anyLong(),
+                        any(MoviePost.class)
+                ))
+                .thenReturn(hasMovie);
+
+        String reqBody = mapper.writeValueAsString(moviePost);
+        MvcResult mvcResult = mockMvc
+                .perform(
+                        post(
+                                "/lists/{listId}/movies",
+                                listId
+                        )
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(reqBody)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        WatchlistHasMovie responseHasMovie = mapper.readValue(
+                response,
+                WatchlistHasMovie.class
+        );
+        assertEquals(hasMovieId, responseHasMovie.getId());
+    }
+
+    @Test
+    public void testAddMovieWithoutValues() throws Exception {
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                new MoviePost(),
+                1
+        );
+
+        mockMvc.perform(reqBuilder)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").isString())
+                .andExpect(jsonPath("$.errors").isArray());
+    }
+
+    @Test
+    public void testAddMovieToNonExistentList() throws Exception {
+        long listId = 501;
+        int tmdbId = 105;
+
+        MoviePost moviePost = new MoviePost();
+        moviePost.setAddedBy(1);
+        moviePost.setTmdbId(tmdbId);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                moviePost,
+                listId
+        );
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(false);
+
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testAddDuplicatedMovie() throws Exception {
+        long listId = 501;
+        int tmdbId = 105;
+
+        MoviePost moviePost = new MoviePost();
+        moviePost.setAddedBy(1);
+        moviePost.setTmdbId(tmdbId);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                moviePost,
+                listId
+        );
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.existsByWatchlistAndTmdbId(
+                        listId,
+                        tmdbId
+                ))
+                .thenReturn(true);
+
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isConflict());
+    }
+
+    private MockHttpServletRequestBuilder makeRequestBuilder(
+            MoviePost moviePost,
+            long listId) throws JsonProcessingException {
+        MockHttpServletRequestBuilder reqBuilder = post(
+                "/lists/{listId}/movies",
+                listId
+        );
+
+        reqBuilder
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(moviePost));
+        return reqBuilder;
     }
 }

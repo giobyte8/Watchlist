@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -58,10 +59,10 @@ public class Movie {
     private Date updatedAt = new Date();
 
     @OneToMany(mappedBy = "movie")
-    private List<Crew> crew;
+    private List<Crew> crew = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
-    private List<Cast> cast;
+    private List<Cast> cast = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -69,7 +70,7 @@ public class Movie {
             joinColumns = { @JoinColumn(name = "movie_id") },
             inverseJoinColumns = { @JoinColumn(name = "genre_id") }
     )
-    private List<Genre> genres;
+    private List<Genre> genres = new ArrayList<>();
 
     public long getId() {
         return id;
