@@ -8,6 +8,7 @@ import com.watchlist.backend.exceptions.WatchlistNotFoundException;
 import com.watchlist.backend.model.WatchlistHasMovie;
 import com.watchlist.backend.services.WatchlistMovieService;
 import com.watchlist.backend.services.WatchlistService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -66,5 +67,20 @@ public class WatchlistMovieController {
 
         updateHasMovie.setHasMovieId(hasMovieId);
         return watchlistMovieService.updateHasMovie(updateHasMovie);
+    }
+
+    @DeleteMapping("{hasMovieId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteWatchlistHasMovie(@PathVariable long listId,
+                                        @PathVariable long hasMovieId) {
+        if (!watchlistService.exists(listId)) {
+            throw new WatchlistNotFoundException();
+        }
+
+        if (!watchlistMovieService.exists(hasMovieId)) {
+            throw new WatchlistHasMovieNotFoundException();
+        }
+
+        watchlistMovieService.deleteHasMovie(hasMovieId);
     }
 }

@@ -127,4 +127,8 @@ public class WatchlistMovieService {
 
         return dbHasMovie;
     }
+
+    public void deleteHasMovie(long hasMovieId) {
+        hasMovieDao.deleteById(hasMovieId);
+    }
 }

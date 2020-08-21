@@ -31,8 +31,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -311,9 +310,72 @@ public class WatchlistMovieControllerTest {
                 hasMovieId
         );
 
-        mockMvc.perform(reqBuilder)
-                .andExpect(status()
-                        .isNotFound());
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteWatchlistHasMovie() throws Throwable {
+        long listId = 101;
+        long hasMovieId = 100000;
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.exists(hasMovieId))
+                .thenReturn(true);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                listId,
+                hasMovieId
+        );
+
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteHasMovieNonExistentList() throws Throwable {
+        long listId = 101;
+        long hasMovieId = 100000;
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(false);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                listId,
+                hasMovieId
+        );
+
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteNonExistentWatchlistHasMovie() throws Throwable {
+        long listId = 101;
+        long hasMovieId = 100000;
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.exists(hasMovieId))
+                .thenReturn(false);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                listId,
+                hasMovieId
+        );
+
+        mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().isNotFound());
     }
 
     private MockHttpServletRequestBuilder makeRequestBuilder(
@@ -344,5 +406,15 @@ public class WatchlistMovieControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(updateHasMovie));
         return reqBuilder;
+    }
+
+    private MockHttpServletRequestBuilder makeRequestBuilder(
+            long listId,
+            long hasMovieId) {
+        return delete(
+                "/lists/{listId}/movies/{hasMovieId}",
+                listId,
+                hasMovieId
+        );
     }
 }
