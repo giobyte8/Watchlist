@@ -188,6 +188,12 @@ paths:
       tags:
       - List's content
       summary: Updates a specified 'WatchlistHasMovie' object
+      description: >-
+        Updates the 'has movie' record in database.
+
+
+        *Note: only `seen_at` field can be updated for now, other fields
+        will be ignored*
       parameters:
       - name: listId
         in: path
@@ -203,6 +209,11 @@ paths:
         schema:
           type: integer
           format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWatchlistHasMovie'
       responses:
         '200':
           description: Element was updated successfully
@@ -347,6 +358,13 @@ components:
           format: date
         movie:
           $ref: '#/components/schemas/Movie'
+
+    UpdateWatchlistHasMovie:
+      type: object
+      properties:
+        seen_at:
+          type: string
+          format: date
 
     Movie:
       type: object

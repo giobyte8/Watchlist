@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
 import com.watchlist.backend.entities.MoviePost;
+import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
 import com.watchlist.backend.model.WatchlistHasMovie;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.WatchlistMovieService;
@@ -24,12 +25,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -217,6 +220,102 @@ public class WatchlistMovieControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    public void testUpdateMovie() throws Throwable {
+        long listId = 101;
+        long hasMovieId = 100000;
+
+        Date seenAt = new Date();
+
+        WatchlistHasMovie hasMovie = new WatchlistHasMovie();
+        hasMovie.setId(hasMovieId);
+        hasMovie.setSeenAt(seenAt);
+
+        UpdateWatchlistHasMovie updateHasMovie = new UpdateWatchlistHasMovie();
+        updateHasMovie.setSeenAt(seenAt);
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.exists(hasMovieId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.updateHasMovie(
+                        any(UpdateWatchlistHasMovie.class)
+                ))
+                .thenReturn(hasMovie);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                updateHasMovie,
+                listId,
+                hasMovieId
+        );
+        MvcResult mvcResult = mockMvc.perform(reqBuilder)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jHasMovie = mvcResult.getResponse().getContentAsString();
+        WatchlistHasMovie rHasMovie = mapper.readValue(
+                jHasMovie,
+                WatchlistHasMovie.class
+        );
+
+        assertEquals(
+                rHasMovie.getSeenAt(),
+                updateHasMovie.getSeenAt()
+        );
+    }
+
+    @Test
+    public void testUpdateMovieNonExistentList() throws Throwable {
+        long listId = 101;
+        long hasMovieId = 100000;
+
+        UpdateWatchlistHasMovie updateHasMovie = new UpdateWatchlistHasMovie();
+        updateHasMovie.setSeenAt(new Date());
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(false);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                updateHasMovie,
+                listId,
+                hasMovieId
+        );
+
+        mockMvc.perform(reqBuilder)
+                .andExpect(status()
+                .isNotFound());
+    }
+
+    @Test
+    public void testUpdateNonExistentWatchlistHasMovie() throws Throwable {
+        long listId = 101;
+        long hasMovieId = 100000;
+
+        UpdateWatchlistHasMovie updateHasMovie = new UpdateWatchlistHasMovie();
+        updateHasMovie.setSeenAt(new Date());
+
+        Mockito
+                .when(watchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(watchlistMovieService.exists(hasMovieId))
+                .thenReturn(false);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                updateHasMovie,
+                listId,
+                hasMovieId
+        );
+
+        mockMvc.perform(reqBuilder)
+                .andExpect(status()
+                        .isNotFound());
+    }
+
     private MockHttpServletRequestBuilder makeRequestBuilder(
             MoviePost moviePost,
             long listId) throws JsonProcessingException {
@@ -228,6 +327,22 @@ public class WatchlistMovieControllerTest {
         reqBuilder
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(moviePost));
+        return reqBuilder;
+    }
+
+    private MockHttpServletRequestBuilder makeRequestBuilder(
+            UpdateWatchlistHasMovie updateHasMovie,
+            long listId,
+            long hasMovieId) throws JsonProcessingException {
+        MockHttpServletRequestBuilder reqBuilder = put(
+                "/lists/{listId}/movies/{hasMovieId}",
+                listId,
+                hasMovieId
+        );
+
+        reqBuilder
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(updateHasMovie));
         return reqBuilder;
     }
 }
