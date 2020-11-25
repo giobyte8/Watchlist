@@ -1,4 +1,4 @@
-package com.watchlist.backend.model;
+package com.watchlist.backend.entities.db;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

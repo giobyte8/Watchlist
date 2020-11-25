@@ -77,19 +77,37 @@ CREATE TABLE user_has_watchlist(
     FOREIGN KEY (watchlist_permission_id) REFERENCES watchlist_permission(id)
 );
 
+CREATE TABLE `language`(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    iso_639 VARCHAR(5) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
 CREATE TABLE movie(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     tmdb_id INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
     original_title VARCHAR(255) NOT NULL,
-    release_date DATE, # Can we make this NOT NULL?
-    runtime INT NOT NULL,
+    release_date DATE,
+    runtime INT,
+    rating DOUBLE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE localized_movie(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
     synopsis VARCHAR(5000) NOT NULL,
-    rating DOUBLE NOT NULL,
     poster_path VARCHAR(2000),
     backdrop_path VARCHAR(2000),
     created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
+    updated_at DATETIME NOT NULL,
+    movie_id BIGINT NOT NULL,
+    language_id BIGINT NOT NULL,
+
+    FOREIGN KEY (movie_id) REFERENCES movie(id),
+    FOREIGN KEY (language_id) REFERENCES `language`(id)
 );
 
 CREATE TABLE watchlist_has_movie(
@@ -105,28 +123,34 @@ CREATE TABLE watchlist_has_movie(
     FOREIGN KEY (added_by) REFERENCES user(id)
 );
 
-CREATE TABLE genre(
+CREATE TABLE movie_genre(
+    id BIGINT PRIMARY KEY
+);
+
+CREATE TABLE localized_movie_genre(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    movie_genre_id BIGINT NOT NULL,
+    language_id BIGINT NOT NULL,
+
+    FOREIGN KEY (movie_genre_id) REFERENCES movie_genre(id),
+    FOREIGN KEY (language_id) REFERENCES `language`(id)
 );
 
 CREATE TABLE movie_has_genre(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     movie_id BIGINT NOT NULL,
-    genre_id BIGINT NOT NULL,
+    movie_genre_id BIGINT NOT NULL,
 
     FOREIGN KEY (movie_id) REFERENCES movie(id),
-    FOREIGN KEY (genre_id) REFERENCES genre(id)
+    FOREIGN KEY (movie_genre_id) REFERENCES movie_genre(id)
 );
 
 CREATE TABLE `cast`(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(500) NOT NULL,
     `character` VARCHAR(500),
-    picture_url VARCHAR(5000),
-    movie_id BIGINT NOT NULL,
-
-    FOREIGN KEY (movie_id) REFERENCES movie(id)
+    picture_url VARCHAR(5000)
 );
 
 CREATE TABLE crew(
@@ -134,10 +158,108 @@ CREATE TABLE crew(
     name VARCHAR(500) NOT NULL,
     job VARCHAR(255) NOT NULL,
     department VARCHAR(255),
-    picture_url VARCHAR(5000),
-    movie_id BIGINT NOT NULL,
+    picture_url VARCHAR(5000)
+);
 
-    FOREIGN KEY (movie_id) REFERENCES movie(id)
+CREATE TABLE movie_has_cast(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    movie_id BIGINT NOT NULL,
+    cast_id BIGINT NOT NULL,
+
+    FOREIGN KEY (movie_id) REFERENCES movie(id),
+    FOREIGN KEY (cast_id) REFERENCES cast(id)
+);
+
+CREATE TABLE movie_has_crew(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    movie_id BIGINT NOT NULL,
+    crew_id BIGINT NOT NULL,
+
+    FOREIGN KEY (movie_id) REFERENCES movie(id),
+    FOREIGN KEY (crew_id) REFERENCES crew(id)
+);
+
+
+--
+-- TV Show tables
+
+CREATE TABLE tv_show(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tmdb_id INT NOT NULL,
+    original_title VARCHAR(255) NOT NULL,
+    first_air_date DATE,
+    rating DOUBLE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE localized_tv_show(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    synopsis VARCHAR(5000),
+    poster_path VARCHAR(2000),
+    backdrop_path VARCHAR(2000),
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    tv_show_id BIGINT NOT NULL,
+    language_id BIGINT NOT NULL,
+
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
+    FOREIGN KEY (language_id) REFERENCES `language`(id)
+);
+
+CREATE TABLE tv_show_genre(
+    id BIGINT PRIMARY KEY
+);
+
+CREATE TABLE localized_tv_show_genre(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    tv_show_genre_id BIGINT NOT NULL,
+    language_id BIGINT NOT NULL,
+
+    FOREIGN KEY (tv_show_genre_id) REFERENCES tv_show_genre(id),
+    FOREIGN KEY (language_id) REFERENCES `language`(id)
+);
+
+CREATE TABLE tv_show_has_genre(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tv_show_id BIGINT NOT NULL,
+    tv_show_genre_id BIGINT NOT NULL,
+
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
+    FOREIGN KEY (tv_show_genre_id) REFERENCES tv_show_genre(id)
+);
+
+CREATE TABLE tv_show_has_crew(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tv_show_id BIGINT NOT NULL,
+    crew_id BIGINT NOT NULL,
+
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
+    FOREIGN KEY (crew_id) REFERENCES crew(id)
+);
+
+CREATE TABLE tv_show_has_cast(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tv_show_id BIGINT NOT NULL,
+    cast_id BIGINT NOT NULL,
+
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
+    FOREIGN KEY (cast_id) REFERENCES cast(id)
+);
+
+CREATE TABLE watchlist_has_tv_show(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    added_at DATETIME NOT NULL,
+    seen_at DATETIME,
+    watchlist_id BIGINT NOT NULL,
+    tv_show_id BIGINT NOT NULL,
+    added_by BIGINT NOT NULL,
+
+    FOREIGN KEY (watchlist_id) REFERENCES watchlist(id),
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
+    FOREIGN KEY (added_by) REFERENCES user(id)
 );
 
 

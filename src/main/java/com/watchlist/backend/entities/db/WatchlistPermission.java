@@ -1,4 +1,4 @@
-package com.watchlist.backend.model;
+package com.watchlist.backend.entities.db;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

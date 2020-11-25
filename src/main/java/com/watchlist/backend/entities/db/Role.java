@@ -1,19 +1,22 @@
-package com.watchlist.backend.model;
+package com.watchlist.backend.entities.db;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "genre")
-public class Genre {
+@Table(name = "role")
+public class Role {
+    public static final long ADMIN = 1;
+    public static final long WATCHER = 2;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
     @Size(max = 255)
+    @NotNull
     private String name;
 
     public long getId() {

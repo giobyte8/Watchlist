@@ -1,4 +1,4 @@
-package com.watchlist.backend.model;
+package com.watchlist.backend.entities.db;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,7 +19,7 @@ public class MovieHasGenre {
     @ManyToOne
     @JoinColumn(name = "genre_id")
     @NotNull
-    private Genre genre;
+    private MovieGenre movieGenre;
 
     public long getId() {
         return id;
@@ -37,11 +37,11 @@ public class MovieHasGenre {
         this.movie = movie;
     }
 
-    public Genre getGenre() {
-        return genre;
+    public MovieGenre getMovieGenre() {
+        return movieGenre;
     }
 
-    public void setGenre(Genre genre) {
-        this.genre = genre;
+    public void setMovieGenre(MovieGenre movieGenre) {
+        this.movieGenre = movieGenre;
     }
 }

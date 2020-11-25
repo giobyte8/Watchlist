@@ -1,4 +1,4 @@
-package com.watchlist.backend.model;
+package com.watchlist.backend.entities.db;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -6,8 +6,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "cast")
-public class Cast {
+@Table(name = "crew")
+public class Crew {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,8 +17,12 @@ public class Cast {
     @NotBlank
     private String name;
 
-    @Size(max = 500)
-    private String character;
+    @Size(max = 255)
+    @NotBlank
+    private String job;
+
+    @Size(max = 255)
+    private String department;
 
     @Column(name = "picture_url")
     @Size(max = 5000)
@@ -45,12 +49,20 @@ public class Cast {
         this.name = name;
     }
 
-    public String getCharacter() {
-        return character;
+    public String getJob() {
+        return job;
     }
 
-    public void setCharacter(String character) {
-        this.character = character;
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
     public String getPictureUrl() {

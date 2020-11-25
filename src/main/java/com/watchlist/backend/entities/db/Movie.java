@@ -1,4 +1,4 @@
-package com.watchlist.backend.model;
+package com.watchlist.backend.entities.db;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -22,10 +22,6 @@ public class Movie {
 
     @NotBlank
     @Size(max = 255)
-    private String title;
-
-    @NotBlank
-    @Size(max = 255)
     @Column(name = "original_title")
     private String originalTitle;
 
@@ -33,20 +29,9 @@ public class Movie {
     @Column(name = "release_date")
     private Date releaseDate;
 
-    @NotNull
     private int runtime;
 
-    @Size(max = 5000)
-    private String synopsis;
-
-    @NotNull
     private double rating;
-
-    @Column(name = "poster_path")
-    private String posterPath;
-
-    @Column(name = "backdrop_path")
-    private String backdropPath;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -58,19 +43,29 @@ public class Movie {
     @NotNull
     private Date updatedAt = new Date();
 
-    @OneToMany(mappedBy = "movie")
+    @ManyToMany
+    @JoinTable(
+            name = "movie_has_crew",
+            joinColumns = { @JoinColumn(name = "movie_id") },
+            inverseJoinColumns = { @JoinColumn(name = "crew_id") }
+    )
     private List<Crew> crew = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie")
+    @ManyToMany
+    @JoinTable(
+            name = "movie_has_cast",
+            joinColumns = { @JoinColumn(name = "movie_id") },
+            inverseJoinColumns = { @JoinColumn(name = "cast_id") }
+    )
     private List<Cast> cast = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
             name = "movie_has_genre",
             joinColumns = { @JoinColumn(name = "movie_id") },
-            inverseJoinColumns = { @JoinColumn(name = "genre_id") }
+            inverseJoinColumns = { @JoinColumn(name = "movie_genre_id") }
     )
-    private List<Genre> genres = new ArrayList<>();
+    private List<MovieGenre> genres = new ArrayList<>();
 
     public long getId() {
         return id;
@@ -86,14 +81,6 @@ public class Movie {
 
     public void setTmdbId(int tmdbId) {
         this.tmdbId = tmdbId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public String getOriginalTitle() {
@@ -120,44 +107,12 @@ public class Movie {
         this.runtime = runtime;
     }
 
-    public String getSynopsis() {
-        return synopsis;
-    }
-
-    public void setSynopsis(String synopsis) {
-        this.synopsis = synopsis;
-    }
-
-    public @NotNull double getRating() {
+    public double getRating() {
         return rating;
     }
 
-    public void setRating(@NotNull double rating) {
+    public void setRating(double rating) {
         this.rating = rating;
-    }
-
-    public String getPosterPath() {
-        return posterPath;
-    }
-
-    public void setPosterPath(String posterPath) {
-        this.posterPath = posterPath;
-    }
-
-    public String getBackdropPath() {
-        return backdropPath;
-    }
-
-    public void setBackdropPath(String backdropPath) {
-        this.backdropPath = backdropPath;
-    }
-
-    public List<Genre> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(List<Genre> genres) {
-        this.genres = genres;
     }
 
     public Date getCreatedAt() {
@@ -192,4 +147,11 @@ public class Movie {
         this.cast = cast;
     }
 
+    public List<MovieGenre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<MovieGenre> genres) {
+        this.genres = genres;
+    }
 }
