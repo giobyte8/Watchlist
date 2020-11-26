@@ -3,11 +3,11 @@ info:
   title: Watchlist API
   version: "1.0"
   description: >-
-    Openapi documentation for endpoints being exposed by watchlist
+    Specification for apps that pretend consume Watchlist API
 
     ### About authentication
 
-    Every endpoint listed below (except `auth/login`) must be invoked using
+    Every endpoint listed below (except `auth/login` and `config`) must be invoked using
     http basic auth through a request header like `Authorization: Bearer <token>`.
 
     In order to get a valid token you must first make a request to the
@@ -15,6 +15,12 @@ info:
     for development at
     [https://developers.facebook.com/tools/explorer/](https://developers.facebook.com/tools/explorer/)
     and by clicking the `Generate token` button
+
+    ### About localization
+
+    There are some endpoints that accepts a `lang` query param in order to get
+    responses with localized values for entities, use ISO-639 code for lang,
+    eg: `?lang=es-MX`
 
 servers:
 - url: http:localhost:8081/api
@@ -45,6 +51,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
+
+  /config:
+    get:
+      tags:
+        - Config
+      summary: App config values
+      description: >-
+        Provides config values for consumption of external services
+        such as TMDB and Youtube APIs
+      responses:
+        '200':
+          description: App configuration values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
 
   /user/{userId}/lists:
     get:
@@ -115,7 +137,7 @@ paths:
         '404':
           description: Given user id does not exists
 
-  /lists/{listId}/movies:
+  /lists/{listId}:
     get:
       tags:
       - List's content
@@ -128,54 +150,62 @@ paths:
         schema:
           type: integer
           format: int32
+      - name: lang
+        in: query
+        description: ISO-639 localization code for response
+        required: false
+        schema:
+          type: string
       responses:
         '200':
-          description: An array containing all movies in list
+          description: An array containing all items in list
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/WatchlistHasMovie'
+                  $ref: '#/components/schemas/WatchlistItem'
         '403':
           description: Unauthorized, current user can not access watchlist
         '404':
           description: Indicated watchlist does not exists
+
+  /lists/{listId}/movies:
     post:
       tags:
-      - List's content
+      - List movies
       summary: Adds the specified movie to this list
       description: |
         Adds a movie to this list \
         NOTE: Movie details will be fetched from "The movie database"
-        along with its crew, pictures and genres. So only 'The movie database
-        id' is required
+        along with its crew, pictures and genres. That's why only basic info
+        is required
       parameters:
-      - name: id
-        in: path
-        description: Id oflist
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: id
+          in: path
+          description: List's id
+          required: true
+          schema:
+            type: integer
+            format: int32
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MoviePost'
+              $ref: '#/components/schemas/WatchlistItemPost'
       responses:
         '200':
           description: >-
-            The created 'watchlist has movie' object. You can use this
-            to refresh the rendered watchlist
+            The created 'watchlist item' object. You can use this
+            to update the rendered watchlist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WatchlistHasMovie'
+                $ref: '#/components/schemas/WatchlistItem'
         '403':
           description: Unauthorized, current user can not access watchlist
         '404':
-          description: Indicated watchlist does not exists
+          description: Indicated watchlist or movie does not exists
         '409':
           description: Conflict, provided movie id is already in this list
           content:
@@ -183,37 +213,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /lists/{listId}/movies/{watchlist_has_movie_id}:
+  /lists/{listId}/movies/{tmdb_id}:
+    get:
+      tags:
+        - List movies
+      summary: Gets all details about specific movie in watchlist
+      parameters:
+        - name: listId
+          in: path
+          description: Watchlist id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: tmdbId
+          in: path
+          description: Tmdb id for requested item
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: lang
+          in: query
+          description: ISO-639 code for preferred language
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Required element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistHasMovie'
+        '403':
+          description: Unauthorized to access element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Element does not exists
     put:
       tags:
-      - List's content
-      summary: Updates a specified 'WatchlistHasMovie' object
+      - List movies
+      summary: Updates a specified watchlist's movie
       description: >-
         Updates the 'has movie' record in database.
 
-
-        *Note: only `seen_at` field can be updated for now, other fields
-        will be ignored*
+        *Note: only `seen_at` field can be updated by now
       parameters:
-      - name: listId
-        in: path
-        description: Watchlist id
-        required: true
-        schema:
-          type: integer
-          format: int32
-      - name: watchlist_has_movie_id
-        in: path
-        description: Id of element to update inside list
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: listId
+          in: path
+          description: Watchlist id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: tmdbId
+          in: path
+          description: Tmdb id for requested item
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: lang
+          in: query
+          description: ISO-639 code for preferred language
+          required: false
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateWatchlistHasMovie'
+              $ref: '#/components/schemas/WatchlistItemPut'
       responses:
         '200':
           description: Element was updated successfully
@@ -231,23 +305,187 @@ paths:
           description: Element does not exists
     delete:
       tags:
-      - List's content
-      summary: Removes specified 'WatchlistHasMovie' object
+      - List movies
+      summary: Removes specified movie from watchlist
       parameters:
-      - name: listId
-        in: path
-        description: Watchlist id
-        required: true
-        schema:
-          type: integer
-          format: int32
-      - name: watchlist_has_movie_id
-        in: path
-        description: Id of element to delete
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: listId
+          in: path
+          description: Watchlist id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: tmdbId
+          in: path
+          description: Tmdb id for requested item
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '204':
+          description: Element was deleted successfully
+        '403':
+          description: Unauthorized to remove element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Element does not exists
+
+  /lists/{listId}/tv:
+    post:
+      tags:
+        - List TV Shows
+      summary: Adds the specified tv show to this list
+      description: |
+        Adds a tv show to this list \
+        NOTE: TV Show details will be fetched from "The movie database"
+        along with its crew, pictures and genres. That's why only basic info
+        is required
+      parameters:
+        - name: id
+          in: path
+          description: List's id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchlistItemPost'
+      responses:
+        '200':
+          description: >-
+            The created 'watchlist item' object. You can use this
+            to update the rendered watchlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistItem'
+        '403':
+          description: Unauthorized, current user can not access watchlist
+        '404':
+          description: Indicated watchlist or tv show does not exists
+        '409':
+          description: Conflict, provided tv show id is already in this list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /lists/{listId}/tv/{tmdb_id}:
+    get:
+      tags:
+        - List TV Shows
+      summary: Gets all details about specific tv show in watchlist
+      parameters:
+        - name: listId
+          in: path
+          description: Watchlist id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: tmdbId
+          in: path
+          description: Tmdb id for requested item
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: lang
+          in: query
+          description: ISO-639 code for preferred language
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Required element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistHasTvShow'
+        '403':
+          description: Unauthorized to access element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Element does not exists
+    put:
+      tags:
+        - List TV Shows
+      summary: Updates a specified watchlist's tv show
+      description: >-
+        Updates the 'has tv show record in database. \
+
+        *Note: only `seen_at` field can be updated by now
+      parameters:
+        - name: listId
+          in: path
+          description: Watchlist id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: tmdbId
+          in: path
+          description: Tmdb id for requested item
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: lang
+          in: query
+          description: ISO-639 code for preferred language
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchlistItemPut'
+      responses:
+        '200':
+          description: Element was updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistHasTvShow'
+        '403':
+          description: Unauthorized to update element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Element does not exists
+    delete:
+      tags:
+        - List TV Shows
+      summary: Removes specified tv show from watchlist
+      parameters:
+        - name: listId
+          in: path
+          description: Watchlist id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: tmdbId
+          in: path
+          description: Tmdb id for requested item
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         '204':
           description: Element was deleted successfully
@@ -262,6 +500,16 @@ paths:
 
 components:
   schemas:
+    Config:
+      type: object
+      properties:
+        tmdb_api_key:
+          type: string
+          description: TMDB API Key
+        yt_api_key:
+          type: string
+          description: Youtube API Key
+
     UserCredentials:
       type: object
       properties:
@@ -335,19 +583,34 @@ components:
         deleted:
           type: boolean
 
+    WatchlistItem:
+      type: object
+      properties:
+        tmdb_id:
+          type: integer
+          format: int32
+        title:
+          type: string
+        synopsis:
+          type: string
+        poster_path:
+          type: string
+        backdrop_path:
+          type: string
+        release_date:
+          type: string
+          format: date
+        media_type: # 'movie' or 'tv'
+          type: string
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+
     WatchlistHasMovie:
       type: object
       properties:
         id:
-          type: integer
-          format: int32
-        watchlist_id:
-          type: integer
-          format: int32
-        movie_id:
-          type: integer
-          format: int32
-        added_by:
           type: integer
           format: int32
         added_at:
@@ -356,15 +619,27 @@ components:
         seen_at:
           type: string
           format: date
+        added_by:
+          $ref: '#/components/schemas/User'
         movie:
           $ref: '#/components/schemas/Movie'
 
-    UpdateWatchlistHasMovie:
+    WatchlistHasTvShow:
       type: object
       properties:
+        id:
+          type: integer
+          format: int32
+        added_at:
+          type: string
+          format: date
         seen_at:
           type: string
           format: date
+        added_by:
+          $ref: '#/components/schemas/User'
+        tv_show:
+          $ref: '#/components/schemas/TVShow'
 
     Movie:
       type: object
@@ -377,7 +652,11 @@ components:
           format: int32
         title:
           type: string
-        original_title:
+        synopsis:
+          type: string
+        poster_path:
+          type: string
+        backdrop_path:
           type: string
         release_date:
           type: string
@@ -385,18 +664,12 @@ components:
         runtime:
           type: integer
           format: int32
-        synopsis:
-          type: string
         rating:
           type: number
         genres:
           type: array
           items:
             $ref: '#/components/schemas/Genre'
-        pictures:
-          type: array
-          items:
-            $ref: '#/components/schemas/Picture'
         cast:
           type: array
           items:
@@ -406,15 +679,40 @@ components:
           items:
             $ref: '#/components/schemas/Crew'
 
-    MoviePost:
+    TVShow:
       type: object
       properties:
+        id:
+          type: integer
+          format: int32
         tmdb_id:
           type: integer
           format: int32
-        added_by:
-          type: integer
-          format: int32
+        title:
+          type: string
+        synopsis:
+          type: string
+        poster_path:
+          type: string
+        backdrop_path:
+          type: string
+        first_air_date:
+          type: string
+          format: date
+        rating:
+          type: number
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+        cast:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cast'
+        crew:
+          type: array
+          items:
+            $ref: '#/components/schemas/Crew'
 
     Cast:
       type: object
@@ -429,9 +727,6 @@ components:
         picture_url:
           type: string
           format: url
-        movie_id:
-          type: integer
-          format: int32
 
     Crew:
       type: object
@@ -448,9 +743,6 @@ components:
         picture_url:
           type: string
           format: url
-        movie_id:
-          type: integer
-          format: int32
 
     Genre:
       type: object
@@ -461,21 +753,23 @@ components:
         name:
           type: string
 
-    Picture:
+    WatchlistItemPost:
       type: object
       properties:
-        id:
+        tmdb_id:
           type: integer
           format: int32
-        movie_id:
-          type: integer
-          format: int32
-        picture_category_id:
-          type: integer
-          format: int32
-        url:
+        language:
           type: string
-          format: uri
+          description: ISO-639 code, eg en-US, es-MX
+
+    WatchlistItemPut:
+      type: object
+      properties:
+        seen_at:
+          type: string
+          format: date
+          description: If null, item will be marked as unseen
 
     ErrorResponse:
       type: object
