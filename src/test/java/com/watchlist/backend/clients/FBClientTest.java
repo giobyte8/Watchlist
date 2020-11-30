@@ -1,6 +1,6 @@
 package com.watchlist.backend.clients;
 
-import com.watchlist.backend.entities.FBUser;
+import com.watchlist.backend.entities.json.FBUser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

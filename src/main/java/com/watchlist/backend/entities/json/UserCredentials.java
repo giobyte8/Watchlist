@@ -1,4 +1,4 @@
-package com.watchlist.backend.entities;
+package com.watchlist.backend.entities.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

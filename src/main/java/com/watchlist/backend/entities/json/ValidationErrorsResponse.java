@@ -1,4 +1,4 @@
-package com.watchlist.backend.entities;
+package com.watchlist.backend.entities.json;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.watchlist.backend.clients;
 
-import com.watchlist.backend.entities.FBUser;
+import com.watchlist.backend.entities.json.FBUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

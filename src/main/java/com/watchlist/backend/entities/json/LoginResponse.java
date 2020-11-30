@@ -1,6 +1,6 @@
-package com.watchlist.backend.entities;
+package com.watchlist.backend.entities.json;
 
-import com.watchlist.backend.model.User;
+import com.watchlist.backend.entities.db.User;
 
 public class LoginResponse {
     private boolean success = false;
