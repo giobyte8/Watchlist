@@ -22,6 +22,9 @@ info:
     responses with localized values for entities, use ISO-639 code for lang,
     eg: `?lang=es-MX`
 
+    In case that requested language is not supported API will default to
+    'en-US' language
+
 servers:
 - url: http:localhost:8081/api
   description: Development server
