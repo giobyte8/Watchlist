@@ -1,7 +1,7 @@
 package com.watchlist.backend.controllers;
 
-import com.watchlist.backend.entities.LoginResponse;
-import com.watchlist.backend.entities.UserCredentials;
+import com.watchlist.backend.entities.json.LoginResponse;
+import com.watchlist.backend.entities.json.UserCredentials;
 import com.watchlist.backend.services.AuthService;
 import com.watchlist.backend.services.UserService;
 import com.watchlist.backend.services.WatchlistService;

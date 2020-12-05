@@ -1,7 +1,7 @@
 package com.watchlist.backend.security;
 
-import com.watchlist.backend.model.Session;
-import com.watchlist.backend.model.User;
+import com.watchlist.backend.entities.db.Session;
+import com.watchlist.backend.entities.db.User;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

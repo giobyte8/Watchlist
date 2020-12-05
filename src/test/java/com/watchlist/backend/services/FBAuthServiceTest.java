@@ -1,9 +1,9 @@
 package com.watchlist.backend.services;
 
 import com.watchlist.backend.clients.FBClient;
-import com.watchlist.backend.entities.UserCredentials;
+import com.watchlist.backend.entities.db.AuthProvider;
+import com.watchlist.backend.entities.json.UserCredentials;
 import com.watchlist.backend.exceptions.WrongAuthProviderException;
-import com.watchlist.backend.model.AuthProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

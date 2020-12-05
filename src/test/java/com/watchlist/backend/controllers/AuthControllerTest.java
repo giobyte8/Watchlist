@@ -1,8 +1,8 @@
 package com.watchlist.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.watchlist.backend.entities.LoginResponse;
-import com.watchlist.backend.entities.UserCredentials;
+import com.watchlist.backend.entities.json.LoginResponse;
+import com.watchlist.backend.entities.json.UserCredentials;
 import com.watchlist.backend.exceptions.WrongAuthProviderException;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.FBAuthService;
