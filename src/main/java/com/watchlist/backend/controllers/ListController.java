@@ -1,8 +1,8 @@
 package com.watchlist.backend.controllers;
 
+import com.watchlist.backend.entities.db.Watchlist;
 import com.watchlist.backend.exceptions.NonUniqueWatchlistNameForUserException;
 import com.watchlist.backend.exceptions.ProvidedUserIdNotFoundException;
-import com.watchlist.backend.model.Watchlist;
 import com.watchlist.backend.services.UserService;
 import com.watchlist.backend.services.WatchlistService;
 import org.springframework.web.bind.annotation.*;

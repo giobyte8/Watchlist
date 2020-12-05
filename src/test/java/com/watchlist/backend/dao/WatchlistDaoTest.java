@@ -1,9 +1,9 @@
 package com.watchlist.backend.dao;
 
-import com.watchlist.backend.model.User;
-import com.watchlist.backend.model.UserHasWatchlist;
-import com.watchlist.backend.model.Watchlist;
-import com.watchlist.backend.model.WatchlistPermission;
+import com.watchlist.backend.entities.db.User;
+import com.watchlist.backend.entities.db.UserHasWatchlist;
+import com.watchlist.backend.entities.db.Watchlist;
+import com.watchlist.backend.entities.db.WatchlistPermission;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

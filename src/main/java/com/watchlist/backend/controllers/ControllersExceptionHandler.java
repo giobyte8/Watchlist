@@ -1,7 +1,7 @@
 package com.watchlist.backend.controllers;
 
-import com.watchlist.backend.entities.ValidationError;
-import com.watchlist.backend.entities.ValidationErrorsResponse;
+import com.watchlist.backend.entities.json.ValidationError;
+import com.watchlist.backend.entities.json.ValidationErrorsResponse;
 import com.watchlist.backend.exceptions.NonUniqueWatchlistNameForUserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;

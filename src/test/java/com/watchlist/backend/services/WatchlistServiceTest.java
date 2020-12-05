@@ -2,10 +2,10 @@ package com.watchlist.backend.services;
 
 import com.watchlist.backend.dao.UserHasWatchlistDao;
 import com.watchlist.backend.dao.WatchlistDao;
-import com.watchlist.backend.model.User;
-import com.watchlist.backend.model.UserHasWatchlist;
-import com.watchlist.backend.model.Watchlist;
-import com.watchlist.backend.model.WatchlistPermission;
+import com.watchlist.backend.entities.db.User;
+import com.watchlist.backend.entities.db.UserHasWatchlist;
+import com.watchlist.backend.entities.db.Watchlist;
+import com.watchlist.backend.entities.db.WatchlistPermission;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;

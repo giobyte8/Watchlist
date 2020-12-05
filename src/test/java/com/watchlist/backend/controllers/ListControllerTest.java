@@ -3,7 +3,7 @@ package com.watchlist.backend.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
-import com.watchlist.backend.model.Watchlist;
+import com.watchlist.backend.entities.db.Watchlist;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.UserService;
 import com.watchlist.backend.services.WatchlistService;
