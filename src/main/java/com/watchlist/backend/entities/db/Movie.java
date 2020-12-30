@@ -43,6 +43,9 @@ public class Movie {
     @NotNull
     private Date updatedAt = new Date();
 
+    @OneToMany(mappedBy = "movie")
+    private List<LocalizedMovie> localizedMovies = new ArrayList<>();
+
     @ManyToMany
     @JoinTable(
             name = "movie_has_crew",
@@ -153,5 +156,13 @@ public class Movie {
 
     public void setGenres(List<MovieGenre> genres) {
         this.genres = genres;
+    }
+
+    public List<LocalizedMovie> getLocalizedMovies() {
+        return localizedMovies;
+    }
+
+    public void setLocalizedMovies(List<LocalizedMovie> localizedMovies) {
+        this.localizedMovies = localizedMovies;
     }
 }

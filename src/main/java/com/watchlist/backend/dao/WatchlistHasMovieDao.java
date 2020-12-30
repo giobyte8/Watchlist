@@ -1,7 +1,7 @@
 package com.watchlist.backend.dao;
 
-import com.watchlist.backend.model.Watchlist;
-import com.watchlist.backend.model.WatchlistHasMovie;
+import com.watchlist.backend.entities.db.Watchlist;
+import com.watchlist.backend.entities.db.WatchlistHasMovie;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

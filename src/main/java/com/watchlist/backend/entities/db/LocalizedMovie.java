@@ -39,6 +39,16 @@ public class LocalizedMovie {
     @Column(name = "updated_at")
     private Date updatedAt = new Date();
 
+    @ManyToOne
+    @JoinColumn(name = "movie_id")
+    @NotNull
+    private Movie movie;
+
+    @ManyToOne
+    @JoinColumn(name = "language_id")
+    @NotNull
+    private Language language;
+
     public long getId() {
         return id;
     }
@@ -93,5 +103,21 @@ public class LocalizedMovie {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
+    public Movie getMovie() {
+        return movie;
+    }
+
+    public void setMovie(Movie movie) {
+        this.movie = movie;
     }
 }

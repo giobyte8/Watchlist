@@ -6,10 +6,7 @@ import com.uwetrottmann.tmdb2.entities.CastMember;
 import com.uwetrottmann.tmdb2.entities.CrewMember;
 import com.uwetrottmann.tmdb2.enumerations.AppendToResponseItem;
 import com.uwetrottmann.tmdb2.services.MoviesService;
-import com.watchlist.backend.model.Cast;
-import com.watchlist.backend.model.Crew;
-import com.watchlist.backend.model.Genre;
-import com.watchlist.backend.model.Movie;
+import com.watchlist.backend.entities.db.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
@@ -18,7 +15,6 @@ import java.io.IOException;
 
 @Service
 public class TmdbClient {
-    private static final String DEFAULT_LANG = "en";
     private final MoviesService moviesService;
 
     public TmdbClient(@Value("${watchlist.tmdb-api-key}") String tmdbApiKey) {
@@ -26,12 +22,12 @@ public class TmdbClient {
         moviesService = tmdb.moviesService();
     }
 
-    public Movie getMovie(int tmdbId)
+    public Movie getMovie(int tmdbId, Language lang)
             throws IOException {
         Response<com.uwetrottmann.tmdb2.entities.Movie> movieResponse = moviesService
                 .summary(
                         tmdbId,
-                        DEFAULT_LANG,
+                        lang.getIso639(),
                         new AppendToResponse(
                                 AppendToResponseItem.CREDITS
                         )
@@ -39,7 +35,7 @@ public class TmdbClient {
                 .execute();
 
         if (movieResponse.isSuccessful() && movieResponse.body() != null) {
-            return toWatchlistMovie(movieResponse.body());
+            return toWatchlistMovie(movieResponse.body(), lang);
         }
 
         throw new IOException("Movie could not be retrieved");
@@ -47,17 +43,22 @@ public class TmdbClient {
 
     @SuppressWarnings("ConstantConditions")
     private Movie toWatchlistMovie(
-            com.uwetrottmann.tmdb2.entities.Movie tmdbMovie) {
+            com.uwetrottmann.tmdb2.entities.Movie tmdbMovie,
+            Language lang) {
         Movie movie = new Movie();
         movie.setTmdbId(tmdbMovie.id);
-        movie.setTitle(tmdbMovie.title);
         movie.setOriginalTitle(tmdbMovie.original_title);
         movie.setReleaseDate(tmdbMovie.release_date);
         movie.setRuntime(tmdbMovie.runtime);
-        movie.setSynopsis(tmdbMovie.overview);
         movie.setRating(tmdbMovie.vote_average);
-        movie.setPosterPath(tmdbMovie.poster_path);
-        movie.setBackdropPath(tmdbMovie.backdrop_path);
+
+        LocalizedMovie localizedMovie = new LocalizedMovie();
+        localizedMovie.setTitle(tmdbMovie.title);
+        localizedMovie.setSynopsis(tmdbMovie.overview);
+        localizedMovie.setPosterPath(tmdbMovie.poster_path);
+        localizedMovie.setBackdropPath(tmdbMovie.backdrop_path);
+        localizedMovie.setLanguage(lang);
+        movie.getLocalizedMovies().add(localizedMovie);
 
         for (CrewMember tmdbCrew : tmdbMovie.credits.crew) {
             Crew crew = new Crew();
@@ -80,11 +81,15 @@ public class TmdbClient {
 
         for (com.uwetrottmann.tmdb2.entities.Genre tmdbGenre :
                 tmdbMovie.genres) {
-            Genre genre = new Genre();
-            genre.setId(tmdbGenre.id);
-            genre.setName(tmdbGenre.name);
+            LocalizedMovieGenre localizedGenre = new LocalizedMovieGenre();
+            localizedGenre.setName(tmdbGenre.name);
+            localizedGenre.setLanguage(lang);
 
-            movie.getGenres().add(genre);
+            MovieGenre movieGenre = new MovieGenre();
+            movieGenre.setId(tmdbGenre.id);
+            movieGenre.getLocalizedGenres().add(localizedGenre);
+
+            movie.getGenres().add(movieGenre);
         }
 
         return movie;

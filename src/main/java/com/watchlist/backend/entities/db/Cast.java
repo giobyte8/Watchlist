@@ -2,7 +2,6 @@ package com.watchlist.backend.entities.db;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -23,11 +22,6 @@ public class Cast {
     @Column(name = "picture_url")
     @Size(max = 5000)
     private String pictureUrl;
-
-    @ManyToOne
-    @JoinColumn(name = "movie_id")
-    @NotNull
-    private Movie movie;
 
     public long getId() {
         return id;
@@ -59,13 +53,5 @@ public class Cast {
 
     public void setPictureUrl(String pictureUrl) {
         this.pictureUrl = pictureUrl;
-    }
-
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public void setMovie(Movie movie) {
-        this.movie = movie;
     }
 }

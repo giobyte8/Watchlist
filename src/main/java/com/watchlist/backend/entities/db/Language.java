@@ -8,6 +8,8 @@ import java.util.Date;
 @Entity
 @Table(name = "language")
 public class Language {
+    public static final String ISO_ES_MX = "es-MX";
+    public static final String ISO_EN_US = "en-US";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
