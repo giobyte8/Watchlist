@@ -167,7 +167,7 @@ CREATE TABLE movie_has_cast(
     cast_id BIGINT NOT NULL,
 
     FOREIGN KEY (movie_id) REFERENCES movie(id),
-    FOREIGN KEY (cast_id) REFERENCES cast(id)
+    FOREIGN KEY (cast_id) REFERENCES `cast`(id)
 );
 
 CREATE TABLE movie_has_crew(
@@ -246,7 +246,7 @@ CREATE TABLE tv_show_has_cast(
     cast_id BIGINT NOT NULL,
 
     FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
-    FOREIGN KEY (cast_id) REFERENCES cast(id)
+    FOREIGN KEY (cast_id) REFERENCES `cast`(id)
 );
 
 CREATE TABLE watchlist_has_tv_show(
@@ -278,3 +278,7 @@ INSERT INTO watchlist_permission VALUES
     (1, 'owner'),
     (2, 'collaborator'),
     (3, 'follower');
+
+INSERT INTO `language` VALUES
+    (1, 'en-US', now(), now()),
+    (2, 'es-MX', now(), now());
