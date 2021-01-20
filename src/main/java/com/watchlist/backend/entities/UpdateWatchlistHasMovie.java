@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+@Deprecated
 public class UpdateWatchlistHasMovie {
 
     private long hasMovieId;

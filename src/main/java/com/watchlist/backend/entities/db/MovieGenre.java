@@ -1,9 +1,6 @@
 package com.watchlist.backend.entities.db;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +11,7 @@ public class MovieGenre {
     @Id
     private long id;
 
-    @OneToMany(mappedBy = "movieGenre")
+    @OneToMany(mappedBy = "movieGenre", fetch = FetchType.EAGER)
     private List<LocalizedMovieGenre> localizedGenres = new ArrayList<>();
 
     public long getId() {

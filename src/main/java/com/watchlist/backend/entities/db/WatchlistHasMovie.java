@@ -26,7 +26,7 @@ public class WatchlistHasMovie {
     @NotNull
     private Watchlist watchlist;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
     @NotNull
     private Movie movie;

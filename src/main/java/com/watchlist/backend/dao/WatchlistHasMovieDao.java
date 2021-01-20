@@ -6,12 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
+import java.util.Queue;
 
 public interface WatchlistHasMovieDao
         extends CrudRepository<WatchlistHasMovie, Long> {
 
-    Collection<WatchlistHasMovie> findByWatchlist(Watchlist watchlist);
+    Queue<WatchlistHasMovie> findByWatchlist(Watchlist watchlist);
+
+    Queue<WatchlistHasMovie> findByWatchlistByOrderByAddedAtDesc(Watchlist watchlist);
 
     @Query(value = "SELECT (count(whm) > 0) " +
             "FROM WatchlistHasMovie whm " +

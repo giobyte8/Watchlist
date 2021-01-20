@@ -43,7 +43,7 @@ public class Movie {
     @NotNull
     private Date updatedAt = new Date();
 
-    @OneToMany(mappedBy = "movie")
+    @OneToMany(mappedBy = "movie", fetch = FetchType.EAGER)
     private List<LocalizedMovie> localizedMovies = new ArrayList<>();
 
     @ManyToMany
@@ -62,7 +62,7 @@ public class Movie {
     )
     private List<Cast> cast = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "movie_has_genre",
             joinColumns = { @JoinColumn(name = "movie_id") },

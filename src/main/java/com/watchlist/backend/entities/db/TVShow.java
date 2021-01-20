@@ -40,6 +40,9 @@ public class TVShow {
     @NotNull
     private Date updatedAt = new Date();
 
+    @OneToMany(mappedBy = "tvShow", fetch = FetchType.EAGER)
+    private List<LocalizedTVShow> localizedTVShows = new ArrayList<>();
+
     @ManyToMany
     @JoinTable(
             name = "tv_show_has_crew",
@@ -126,5 +129,29 @@ public class TVShow {
 
     public void setGenres(List<TVShowGenre> genres) {
         this.genres = genres;
+    }
+
+    public List<LocalizedTVShow> getLocalizedTVShows() {
+        return localizedTVShows;
+    }
+
+    public void setLocalizedTVShows(List<LocalizedTVShow> localizedTVShows) {
+        this.localizedTVShows = localizedTVShows;
+    }
+
+    public List<Crew> getCrew() {
+        return crew;
+    }
+
+    public void setCrew(List<Crew> crew) {
+        this.crew = crew;
+    }
+
+    public List<Cast> getCast() {
+        return cast;
+    }
+
+    public void setCast(List<Cast> cast) {
+        this.cast = cast;
     }
 }

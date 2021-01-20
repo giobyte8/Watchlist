@@ -44,7 +44,7 @@ public class LocalizedMovie {
     @NotNull
     private Movie movie;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "language_id")
     @NotNull
     private Language language;

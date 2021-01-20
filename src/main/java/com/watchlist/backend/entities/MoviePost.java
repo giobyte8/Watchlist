@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.Min;
 
+@Deprecated
 public class MoviePost {
 
     @JsonProperty("tmdb_id")

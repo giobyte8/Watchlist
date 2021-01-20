@@ -1,9 +1,9 @@
 package com.watchlist.backend.dao;
 
-import com.watchlist.backend.model.Genre;
+import com.watchlist.backend.entities.db.MovieGenre;
 import org.springframework.data.repository.CrudRepository;
 
-public interface GenreDao extends CrudRepository<Genre, Long> {
+public interface GenreDao extends CrudRepository<MovieGenre, Long> {
 
-    boolean existsByName(String name);
+//    boolean existsByName(String name);
 }

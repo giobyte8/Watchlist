@@ -26,7 +26,7 @@ public class WatchlistHasTVShow {
     @NotNull
     private Watchlist watchlist;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tv_show_id")
     @NotNull
     private TVShow tvShow;
