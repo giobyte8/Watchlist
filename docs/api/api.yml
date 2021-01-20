@@ -762,9 +762,6 @@ components:
         tmdb_id:
           type: integer
           format: int32
-        language:
-          type: string
-          description: ISO-639 code, eg en-US, es-MX
 
     WatchlistItemPut:
       type: object
