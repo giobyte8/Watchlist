@@ -10,6 +10,7 @@ import java.util.Date;
 public class Language {
     public static final String ISO_ES_MX = "es-MX";
     public static final String ISO_EN_US = "en-US";
+    public static final String[] SUPPORTED_LANGUAGES = { ISO_EN_US, ISO_ES_MX };
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

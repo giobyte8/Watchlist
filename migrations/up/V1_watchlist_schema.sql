@@ -146,37 +146,25 @@ CREATE TABLE movie_has_genre(
     FOREIGN KEY (movie_genre_id) REFERENCES movie_genre(id)
 );
 
-CREATE TABLE `cast`(
+CREATE TABLE movie_cast(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(500) NOT NULL,
     `character` VARCHAR(500),
-    picture_url VARCHAR(5000)
+    picture_url VARCHAR(5000),
+    movie_id BIGINT NOT NULL,
+
+    FOREIGN KEY (movie_id) REFERENCES movie(id)
 );
 
-CREATE TABLE crew(
+CREATE TABLE movie_crew(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(500) NOT NULL,
     job VARCHAR(255) NOT NULL,
     department VARCHAR(255),
-    picture_url VARCHAR(5000)
-);
-
-CREATE TABLE movie_has_cast(
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    picture_url VARCHAR(5000),
     movie_id BIGINT NOT NULL,
-    cast_id BIGINT NOT NULL,
 
-    FOREIGN KEY (movie_id) REFERENCES movie(id),
-    FOREIGN KEY (cast_id) REFERENCES `cast`(id)
-);
-
-CREATE TABLE movie_has_crew(
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    movie_id BIGINT NOT NULL,
-    crew_id BIGINT NOT NULL,
-
-    FOREIGN KEY (movie_id) REFERENCES movie(id),
-    FOREIGN KEY (crew_id) REFERENCES crew(id)
+    FOREIGN KEY (movie_id) REFERENCES movie(id)
 );
 
 
@@ -231,22 +219,25 @@ CREATE TABLE tv_show_has_genre(
     FOREIGN KEY (tv_show_genre_id) REFERENCES tv_show_genre(id)
 );
 
-CREATE TABLE tv_show_has_crew(
+CREATE TABLE tv_show_cast(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(500) NOT NULL,
+    `character` VARCHAR(500),
+    picture_url VARCHAR(5000),
     tv_show_id BIGINT NOT NULL,
-    crew_id BIGINT NOT NULL,
 
-    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
-    FOREIGN KEY (crew_id) REFERENCES crew(id)
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id)
 );
 
-CREATE TABLE tv_show_has_cast(
+CREATE TABLE tv_show_crew(
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(500) NOT NULL,
+    job VARCHAR(255) NOT NULL,
+    department VARCHAR(255),
+    picture_url VARCHAR(5000),
     tv_show_id BIGINT NOT NULL,
-    cast_id BIGINT NOT NULL,
 
-    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id),
-    FOREIGN KEY (cast_id) REFERENCES `cast`(id)
+    FOREIGN KEY (tv_show_id) REFERENCES tv_show(id)
 );
 
 CREATE TABLE watchlist_has_tv_show(

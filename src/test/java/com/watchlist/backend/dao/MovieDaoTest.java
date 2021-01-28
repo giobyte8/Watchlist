@@ -1,9 +1,9 @@
 package com.watchlist.backend.dao;
 
-import com.watchlist.backend.model.Cast;
-import com.watchlist.backend.model.Crew;
-import com.watchlist.backend.model.Genre;
-import com.watchlist.backend.model.Movie;
+import com.watchlist.backend.entities.db.Cast;
+import com.watchlist.backend.entities.db.Crew;
+import com.watchlist.backend.entities.db.MovieGenre;
+import com.watchlist.backend.entities.db.Movie;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +32,11 @@ public class MovieDaoTest {
         String movieTitle = "Dummy title";
         int tmdbId = 101;
 
-        Genre genre1 = new Genre();
-        genre1.setId(5001);
-        genre1.setName("Test genre 1");
+        MovieGenre movieGenre1 = new MovieGenre();
+        movieGenre1.setId(5001);
 
-        Genre genre2 = new Genre();
-        genre2.setId(5002);
-        genre2.setName("Test genre 2");
+        MovieGenre movieGenre2 = new MovieGenre();
+        movieGenre2.setId(5002);
 
         Crew crew1 = new Crew();
         crew1.setName("John Doe");
@@ -62,16 +60,13 @@ public class MovieDaoTest {
 
         Movie movie = new Movie();
         movie.setTmdbId(tmdbId);
-        movie.setTitle(movieTitle);
         movie.setOriginalTitle(movieTitle);
         movie.setReleaseDate(new Date());
         movie.setRuntime(101);
-        movie.setSynopsis("Something");
         movie.setRating(5.5);
-        movie.setPosterPath("something/poster.png");
 
-        movie.getGenres().add(genre1);
-        movie.getGenres().add(genre2);
+        movie.getGenres().add(movieGenre1);
+        movie.getGenres().add(movieGenre2);
 
         movie.getCast().add(cast1);
         movie.getCast().add(cast2);
@@ -84,7 +79,7 @@ public class MovieDaoTest {
         Movie dbMovie = movieDao.findByTmdbId(tmdbId);
         assertNotNull(dbMovie);
         assertEquals(tmdbId, dbMovie.getTmdbId());
-        assertEquals(movieTitle, dbMovie.getTitle());
+        assertEquals(movieTitle, dbMovie.getOriginalTitle());
         assertEquals(2, dbMovie.getGenres().size());
         assertEquals(2, dbMovie.getCast().size());
         assertEquals(2, dbMovie.getCrew().size());

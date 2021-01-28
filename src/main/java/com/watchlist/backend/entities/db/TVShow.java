@@ -43,21 +43,11 @@ public class TVShow {
     @OneToMany(mappedBy = "tvShow", fetch = FetchType.EAGER)
     private List<LocalizedTVShow> localizedTVShows = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "tv_show_has_crew",
-            joinColumns = { @JoinColumn(name = "tv_show_id") },
-            inverseJoinColumns = { @JoinColumn(name = "crew_id") }
-    )
-    private List<Crew> crew = new ArrayList<>();
+    @OneToMany(mappedBy = "tvShow")
+    private List<TVShowCrew> crew = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "tv_show_has_cast",
-            joinColumns = { @JoinColumn(name = "tv_show_id") },
-            inverseJoinColumns = { @JoinColumn(name = "cast_id" )}
-    )
-    private List<Cast> cast = new ArrayList<>();
+    @OneToMany(mappedBy = "tvShow")
+    private List<TVShowCast> cast = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -139,19 +129,19 @@ public class TVShow {
         this.localizedTVShows = localizedTVShows;
     }
 
-    public List<Crew> getCrew() {
+    public List<TVShowCrew> getCrew() {
         return crew;
     }
 
-    public void setCrew(List<Crew> crew) {
+    public void setCrew(List<TVShowCrew> crew) {
         this.crew = crew;
     }
 
-    public List<Cast> getCast() {
+    public List<TVShowCast> getCast() {
         return cast;
     }
 
-    public void setCast(List<Cast> cast) {
+    public void setCast(List<TVShowCast> cast) {
         this.cast = cast;
     }
 }

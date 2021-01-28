@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
 import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
-import com.watchlist.backend.model.WatchlistHasMovie;
+import com.watchlist.backend.entities.db.WatchlistHasMovie;
 import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.services.WatchlistMovieService;
 import com.watchlist.backend.services.WatchlistService;
@@ -36,13 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = WatchlistMovieController.class)
+@WebMvcTest(controllers = ListMoviesController.class)
 @Import(TestSecurityConfig.class)
 @MockBean({
         JWTUtils.class,
         RestTemplate.class,
 })
-public class WatchlistMovieControllerTest {
+public class ListMoviesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

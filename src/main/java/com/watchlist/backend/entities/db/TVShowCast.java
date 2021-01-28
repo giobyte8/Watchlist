@@ -5,8 +5,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "cast")
-public class Cast {
+@Table(name = "tv_show_cast")
+public class TVShowCast {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +22,10 @@ public class Cast {
     @Column(name = "picture_url")
     @Size(max = 5000)
     private String pictureUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "tv_show_id")
+    private TVShow tvShow;
 
     public long getId() {
         return id;
@@ -53,5 +57,13 @@ public class Cast {
 
     public void setPictureUrl(String pictureUrl) {
         this.pictureUrl = pictureUrl;
+    }
+
+    public TVShow getTvShow() {
+        return tvShow;
+    }
+
+    public void setTvShow(TVShow tvShow) {
+        this.tvShow = tvShow;
     }
 }

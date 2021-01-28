@@ -6,8 +6,8 @@ import com.watchlist.backend.dao.WatchlistHasMovieDao;
 import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
 import com.watchlist.backend.exceptions.WatchlistHasMovieNotFoundException;
-import com.watchlist.backend.model.Movie;
-import com.watchlist.backend.model.WatchlistHasMovie;
+import com.watchlist.backend.entities.db.Movie;
+import com.watchlist.backend.entities.db.WatchlistHasMovie;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -48,7 +48,7 @@ public class WatchlistMovieServiceTest {
         int tmdbId = 100001;
 
         Movie movie = new Movie();
-        movie.setTitle("Heroes");
+//        movie.setTitle("Heroes");
 
         MoviePost moviePost = new MoviePost();
         moviePost.setTmdbId(tmdbId);
@@ -57,9 +57,9 @@ public class WatchlistMovieServiceTest {
         Mockito
                 .when(movieDao.existsByTmdbId(tmdbId))
                 .thenReturn(false);
-        Mockito
-                .when(tmdbClient.getMovie(tmdbId))
-                .thenReturn(movie);
+//        Mockito
+//                .when(tmdbClient.getMovie(tmdbId))
+//                .thenReturn(movie);
 
         watchlistMovieService.addMovie(101, moviePost);
 
@@ -76,7 +76,7 @@ public class WatchlistMovieServiceTest {
         int tmdbId = 100001;
 
         Movie movie = new Movie();
-        movie.setTitle("Heroes");
+//        movie.setTitle("Heroes");
 
         MoviePost moviePost = new MoviePost();
         moviePost.setTmdbId(tmdbId);

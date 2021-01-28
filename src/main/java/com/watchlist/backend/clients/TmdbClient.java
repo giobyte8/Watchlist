@@ -61,7 +61,7 @@ public class TmdbClient {
         movie.getLocalizedMovies().add(localizedMovie);
 
         for (CrewMember tmdbCrew : tmdbMovie.credits.crew) {
-            Crew crew = new Crew();
+            MovieCrew crew = new MovieCrew();
             crew.setName(tmdbCrew.name);
             crew.setJob(tmdbCrew.job);
             crew.setDepartment(tmdbCrew.department);
@@ -71,7 +71,7 @@ public class TmdbClient {
         }
 
         for (CastMember tmdbCast : tmdbMovie.credits.cast) {
-            Cast cast = new Cast();
+            MovieCast cast = new MovieCast();
             cast.setName(tmdbCast.name);
             cast.setCharacter(tmdbCast.character);
             cast.setPictureUrl(tmdbCast.profile_path);
