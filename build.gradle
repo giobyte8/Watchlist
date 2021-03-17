@@ -23,24 +23,19 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.18'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'com.uwetrottmann.tmdb2:tmdb-java:2.2.0'
+    
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.5.RELEASE'
     testImplementation 'org.springframework.security:spring-security-test:5.2.2.RELEASE'
     testImplementation 'junit:junit:4.12'
     testImplementation 'com.h2database:h2:1.4.194'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 }
 
 group = 'com.watchlist'
 version = '0.0.1-SNAPSHOT'
 description = 'backend'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
