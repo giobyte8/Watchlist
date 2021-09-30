@@ -762,6 +762,9 @@ components:
         tmdb_id:
           type: integer
           format: int32
+        lang:
+          type: string
+          description: ISO-639 localization code for response
 
     WatchlistItemPut:
       type: object
