@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
         JWTUtils.class,
         RestTemplate.class
 })
-class BackendApplicationTests {
+class BackendApplicationTest {
 
   @Test
   void contextLoads() {}
