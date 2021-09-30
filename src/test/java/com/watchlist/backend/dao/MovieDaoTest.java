@@ -1,7 +1,7 @@
 package com.watchlist.backend.dao;
 
-import com.watchlist.backend.entities.db.Cast;
-import com.watchlist.backend.entities.db.Crew;
+import com.watchlist.backend.entities.db.MovieCast;
+import com.watchlist.backend.entities.db.MovieCrew;
 import com.watchlist.backend.entities.db.MovieGenre;
 import com.watchlist.backend.entities.db.Movie;
 import org.junit.Test;
@@ -38,23 +38,23 @@ public class MovieDaoTest {
         MovieGenre movieGenre2 = new MovieGenre();
         movieGenre2.setId(5002);
 
-        Crew crew1 = new Crew();
+        MovieCrew crew1 = new MovieCrew();
         crew1.setName("John Doe");
         crew1.setJob("Something");
         crew1.setDepartment("Production");
         crew1.setPictureUrl("sample.com/profile.png");
 
-        Crew crew2 = new Crew();
+        MovieCrew crew2 = new MovieCrew();
         crew2.setName("Elon Doe");
         crew2.setJob("Something");
         crew2.setDepartment("Production");
 
-        Cast cast1 = new Cast();
+        MovieCast cast1 = new MovieCast();
         cast1.setName("Some legal name");
         cast1.setCharacter("Some uncommon name");
         cast1.setPictureUrl("sample.com/profile.png");
 
-        Cast cast2 = new Cast();
+        MovieCast cast2 = new MovieCast();
         cast2.setName("Some legal name");
         cast2.setCharacter("Some uncommon name");
 
