@@ -8,5 +8,5 @@ import java.util.Queue;
 
 public interface WatchlistHasTVShowDao extends CrudRepository<WatchlistHasTVShow, Long> {
 
-    Queue<WatchlistHasTVShow> findByWatchlistByOrderByAddedAtDesc(Watchlist watchlist);
+    Queue<WatchlistHasTVShow> findByWatchlistOrderByAddedAtDesc(Watchlist watchlist);
 }

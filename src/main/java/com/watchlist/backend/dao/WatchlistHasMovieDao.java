@@ -13,7 +13,7 @@ public interface WatchlistHasMovieDao
 
     Queue<WatchlistHasMovie> findByWatchlist(Watchlist watchlist);
 
-    Queue<WatchlistHasMovie> findByWatchlistByOrderByAddedAtDesc(Watchlist watchlist);
+    Queue<WatchlistHasMovie> findByWatchlistOrderByAddedAtDesc(Watchlist watchlist);
 
     @Query(value = "SELECT (count(whm) > 0) " +
             "FROM WatchlistHasMovie whm " +

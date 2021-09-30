@@ -43,9 +43,9 @@ public class ListContentService {
         Language lang = languageService.parseISO639(iso639);
 
         Queue<WatchlistHasMovie> hasMovies = hasMovieDao
-                .findByWatchlistByOrderByAddedAtDesc(list);
+                .findByWatchlistOrderByAddedAtDesc(list);
         Queue<WatchlistHasTVShow> hasTVShows = hasTVShowDao
-                .findByWatchlistByOrderByAddedAtDesc(list);
+                .findByWatchlistOrderByAddedAtDesc(list);
         List<WatchlistItem> listContent =
                 new ArrayList<>(hasMovies.size() + hasTVShows.size());
 
