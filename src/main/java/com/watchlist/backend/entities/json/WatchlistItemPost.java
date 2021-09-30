@@ -2,12 +2,15 @@ package com.watchlist.backend.entities.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.Min;
+
 public class WatchlistItemPost {
 
     @JsonProperty("tmdb_id")
+    @Min(1)
     private int tmdbId;
 
-    private String language;
+    private String lang;
 
     public int getTmdbId() {
         return tmdbId;
@@ -17,11 +20,11 @@ public class WatchlistItemPost {
         this.tmdbId = tmdbId;
     }
 
-    public String getLanguage() {
-        return language;
+    public String getLang() {
+        return lang;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 }

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Localized representation of a Movie or TV Show
+ */
 public class WatchlistItem {
 
     @JsonProperty("tmdb_id")
