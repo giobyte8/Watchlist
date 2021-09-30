@@ -52,7 +52,7 @@ public class Movie {
     @OneToMany(mappedBy = "movie")
     private List<MovieCast> cast = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name = "movie_has_genre",
             joinColumns = { @JoinColumn(name = "movie_id") },

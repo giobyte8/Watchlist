@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity
-@Table(name = "localized_table")
+@Table(name = "localized_movie")
 public class LocalizedMovie {
 
     @Id

@@ -11,7 +11,7 @@ public class MovieGenre {
     @Id
     private long id;
 
-    @OneToMany(mappedBy = "movieGenre", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "movieGenre")
     private List<LocalizedMovieGenre> localizedGenres = new ArrayList<>();
 
     public long getId() {
