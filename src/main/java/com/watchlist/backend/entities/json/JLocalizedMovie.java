@@ -12,7 +12,7 @@ import java.util.List;
         "lang",
         "mediaType"
 })
-public class LocalizedMovie extends LocalizedListItem {
+public class JLocalizedMovie extends LocalizedListItem {
 
     @JsonProperty("tmdb_id")
     private int tmdbId;

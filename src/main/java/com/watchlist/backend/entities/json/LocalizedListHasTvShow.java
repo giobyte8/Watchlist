@@ -20,7 +20,7 @@ public class LocalizedListHasTvShow {
     private User addedBy;
 
     @JsonProperty("tv_show")
-    private LocalizedTvShow tvShow;
+    private JLocalizedTvShow tvShow;
 
     public long getId() {
         return id;
@@ -62,11 +62,11 @@ public class LocalizedListHasTvShow {
         this.addedBy = addedBy;
     }
 
-    public LocalizedTvShow getTvShow() {
+    public JLocalizedTvShow getTvShow() {
         return tvShow;
     }
 
-    public void setTvShow(LocalizedTvShow tvShow) {
+    public void setTvShow(JLocalizedTvShow tvShow) {
         this.tvShow = tvShow;
     }
 }

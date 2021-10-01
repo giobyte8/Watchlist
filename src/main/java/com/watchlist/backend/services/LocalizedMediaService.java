@@ -2,6 +2,10 @@ package com.watchlist.backend.services;
 
 import com.watchlist.backend.entities.db.*;
 import com.watchlist.backend.entities.json.JGenre;
+import com.watchlist.backend.entities.json.JLocalizedMovie;
+import com.watchlist.backend.entities.json.LocalizedListHasMovie;
+import com.watchlist.backend.entities.json.LocalizedListHasTvShow;
+import com.watchlist.backend.entities.json.JLocalizedTvShow;
 import com.watchlist.backend.entities.json.MediaType;
 import com.watchlist.backend.entities.json.LocalizedListItem;
 import org.springframework.stereotype.Service;
@@ -59,6 +63,71 @@ public class LocalizedMediaService {
         ));
 
         return localizedListItem;
+    }
+
+    public LocalizedListHasMovie toLocalizedHasMovie(WatchlistHasMovie hasMovie,
+                                                     Language lang) {
+        LocalizedMovie locMovie = findMovieForLang(
+                hasMovie.getMovie().getLocalizedMovies(),
+                lang
+        );
+
+        JLocalizedMovie jLocMovie = new JLocalizedMovie();
+        jLocMovie.setTmdbId(hasMovie.getMovie().getTmdbId());
+        jLocMovie.setTitle(locMovie.getTitle());
+        jLocMovie.setSynopsis(locMovie.getSynopsis());
+        jLocMovie.setPosterPath(locMovie.getPosterPath());
+        jLocMovie.setBackdropPath(locMovie.getBackdropPath());
+        jLocMovie.setReleaseDate(hasMovie.getMovie().getReleaseDate());
+        jLocMovie.setRuntime(hasMovie.getMovie().getRuntime());
+        jLocMovie.setRating(hasMovie.getMovie().getRating());
+        jLocMovie.setCrew(hasMovie.getMovie().getCrew());
+        jLocMovie.setCast(hasMovie.getMovie().getCast());
+        jLocMovie.setGenres(getLocalizedMovieGenres(
+                locMovie.getMovie().getGenres(),
+                lang
+        ));
+
+        LocalizedListHasMovie locHasMovie = new LocalizedListHasMovie();
+        locHasMovie.setId(hasMovie.getId());
+        locHasMovie.setLang(lang.getIso639());
+        locHasMovie.setAddedBy(hasMovie.getAddedBy());
+        locHasMovie.setAddedAt(hasMovie.getAddedAt());
+        locHasMovie.setSeenAt(hasMovie.getSeenAt());
+        locHasMovie.setMovie(jLocMovie);
+        return locHasMovie;
+    }
+
+    public LocalizedListHasTvShow toLocalizedHasTvShow(WatchlistHasTVShow hasTVShow,
+                                                       Language lang) {
+        LocalizedTVShow locTvShow = findTVForLang(
+                hasTVShow.getTvShow().getLocalizedTVShows(),
+                lang
+        );
+
+        JLocalizedTvShow jLocTvShow = new JLocalizedTvShow();
+        jLocTvShow.setTmdbId(hasTVShow.getTvShow().getTmdbId());
+        jLocTvShow.setTitle(locTvShow.getTitle());
+        jLocTvShow.setSynopsis(locTvShow.getSynopsis());
+        jLocTvShow.setPosterPath(locTvShow.getPosterPath());
+        jLocTvShow.setBackdropPath(locTvShow.getBackdropPath());
+        jLocTvShow.setReleaseDate(hasTVShow.getTvShow().getFirstAirDate());
+        jLocTvShow.setRating(hasTVShow.getTvShow().getRating());
+        jLocTvShow.setCrew(hasTVShow.getTvShow().getCrew());
+        jLocTvShow.setCast(hasTVShow.getTvShow().getCast());
+        jLocTvShow.setGenres(getLocalizedTVShowGenres(
+                locTvShow.getTvShow().getGenres(),
+                lang
+        ));
+
+        LocalizedListHasTvShow locHasTvShow = new LocalizedListHasTvShow();
+        locHasTvShow.setId(hasTVShow.getId());
+        locHasTvShow.setLang(lang.getIso639());
+        locHasTvShow.setAddedBy(hasTVShow.getAddedBy());
+        locHasTvShow.setAddedAt(hasTVShow.getAddedAt());
+        locHasTvShow.setSeenAt(hasTVShow.getSeenAt());
+        locHasTvShow.setTvShow(jLocTvShow);
+        return locHasTvShow;
     }
 
     /**

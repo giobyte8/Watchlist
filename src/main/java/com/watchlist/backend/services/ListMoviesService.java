@@ -8,10 +8,11 @@ import com.watchlist.backend.entities.db.Movie;
 import com.watchlist.backend.entities.db.User;
 import com.watchlist.backend.entities.db.Watchlist;
 import com.watchlist.backend.entities.db.WatchlistHasMovie;
+import com.watchlist.backend.entities.json.LocalizedListHasMovie;
 import com.watchlist.backend.entities.json.LocalizedListItem;
 import com.watchlist.backend.entities.json.WatchlistItemPost;
 import com.watchlist.backend.exceptions.TmdbClientException;
-import com.watchlist.backend.exceptions.WatchlistHasMovieNotFoundException;
+import com.watchlist.backend.exceptions.ListHasItemNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,15 +50,6 @@ public class ListMoviesService {
         this.locMovieService = locMovieService;
         this.locMediaService = locMediaService;
         this.langService = langService;
-    }
-
-    public Collection<WatchlistHasMovie> getMovies(long watchlistId) {
-        Watchlist watchlist = entityManager.getReference(
-                Watchlist.class,
-                watchlistId
-        );
-
-        return hasMovieDao.findByWatchlist(watchlist);
     }
 
     public boolean exists(long watchlistHasMovieId) {
@@ -136,6 +128,18 @@ public class ListMoviesService {
         );
     }
 
+    public LocalizedListHasMovie getMovie(long listId, int tmdbId, String lang) {
+        WatchlistHasMovie hasMovie = hasMovieDao.findByWatchlistAndTmdbId(
+                listId,
+                tmdbId
+        );
+
+        return locMediaService.toLocalizedHasMovie(
+                hasMovie,
+                langService.parseISO639(lang)
+        );
+    }
+
     /**
      * Updates provided watchlist 'hasMovie' (Queried by id). Only
      * 'seen_at' will be updated for now
@@ -147,7 +151,7 @@ public class ListMoviesService {
     public WatchlistHasMovie updateHasMovie(UpdateWatchlistHasMovie hasMovie)
             throws Throwable {
         Supplier<Throwable> notFoundSupplier =
-                WatchlistHasMovieNotFoundException::new;
+                ListHasItemNotFoundException::new;
         WatchlistHasMovie dbHasMovie = hasMovieDao
                 .findById(hasMovie.getHasMovieId())
                 .orElseThrow(notFoundSupplier);

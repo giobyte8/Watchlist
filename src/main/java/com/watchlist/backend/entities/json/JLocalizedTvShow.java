@@ -13,7 +13,7 @@ import java.util.List;
         "lang",
         "mediaType"
 })
-public class LocalizedTvShow extends LocalizedListItem {
+public class JLocalizedTvShow extends LocalizedListItem {
 
     private double rating;
 

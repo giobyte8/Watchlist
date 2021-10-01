@@ -5,7 +5,7 @@ import com.watchlist.backend.dao.MovieDao;
 import com.watchlist.backend.dao.WatchlistHasMovieDao;
 import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
-import com.watchlist.backend.exceptions.WatchlistHasMovieNotFoundException;
+import com.watchlist.backend.exceptions.ListHasItemNotFoundException;
 import com.watchlist.backend.entities.db.Movie;
 import com.watchlist.backend.entities.db.WatchlistHasMovie;
 import org.junit.Test;
@@ -122,7 +122,7 @@ public class ListMoviesServiceTest {
         assertEquals(updateHasMovie.getSeenAt(), rHasMovie.getSeenAt());
     }
 
-    @Test(expected = WatchlistHasMovieNotFoundException.class)
+    @Test(expected = ListHasItemNotFoundException.class)
     public void testUpdateNonExistentWatchlistHasMovie() throws Throwable {
         long hasMovieId = 1003;
         Date seenAt = new Date();

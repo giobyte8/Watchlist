@@ -11,8 +11,6 @@ import java.util.Queue;
 public interface WatchlistHasMovieDao
         extends CrudRepository<WatchlistHasMovie, Long> {
 
-    Queue<WatchlistHasMovie> findByWatchlist(Watchlist watchlist);
-
     Queue<WatchlistHasMovie> findByWatchlistOrderByAddedAtDesc(Watchlist watchlist);
 
     @Query(value = "SELECT (count(whm) > 0) " +
@@ -21,4 +19,11 @@ public interface WatchlistHasMovieDao
             "  AND whm.movie.tmdbId = :tmdbId")
     boolean existsByWatchlistAndTmdbId(@Param("watchlistId") long watchlistId,
                                        @Param("tmdbId") int tmdbId);
+
+    @Query(value = "SELECT whm " +
+            "FROM WatchlistHasMovie whm " +
+            "WHERE whm.watchlist.id = :watchlistId " +
+            "  AND whm.movie.tmdbId = :tmdbId")
+    WatchlistHasMovie findByWatchlistAndTmdbId(@Param("watchlistId") long watchlistId,
+                                               @Param("tmdbId") int tmdbId);
 }

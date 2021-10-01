@@ -19,7 +19,7 @@ public class LocalizedListHasMovie {
     @JsonProperty("added_by")
     private User addedBy;
 
-    private LocalizedMovie movie;
+    private JLocalizedMovie movie;
 
     public long getId() {
         return id;
@@ -61,11 +61,11 @@ public class LocalizedListHasMovie {
         this.addedBy = addedBy;
     }
 
-    public LocalizedMovie getMovie() {
+    public JLocalizedMovie getMovie() {
         return movie;
     }
 
-    public void setMovie(LocalizedMovie movie) {
+    public void setMovie(JLocalizedMovie movie) {
         this.movie = movie;
     }
 }
