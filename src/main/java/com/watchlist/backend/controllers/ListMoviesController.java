@@ -1,55 +1,60 @@
 package com.watchlist.backend.controllers;
 
-import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
+import com.watchlist.backend.entities.db.WatchlistHasMovie;
+import com.watchlist.backend.entities.json.LocalizedListItem;
+import com.watchlist.backend.entities.json.WatchlistItemPost;
 import com.watchlist.backend.exceptions.DuplicatedWatchlistMovieException;
 import com.watchlist.backend.exceptions.WatchlistHasMovieNotFoundException;
 import com.watchlist.backend.exceptions.WatchlistNotFoundException;
-import com.watchlist.backend.model.WatchlistHasMovie;
-import com.watchlist.backend.services.WatchlistMovieService;
+import com.watchlist.backend.security.UserPrincipal;
+import com.watchlist.backend.services.ListMoviesService;
 import com.watchlist.backend.services.WatchlistService;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Collection;
 
 @RestController
 @RequestMapping("lists/{listId}/movies")
-public class WatchlistMovieController {
+public class ListMoviesController  {
 
     private final WatchlistService watchlistService;
-    private final WatchlistMovieService watchlistMovieService;
+    private final ListMoviesService listMoviesService;
 
-    public WatchlistMovieController(WatchlistService watchlistService,
-                                    WatchlistMovieService watchlistMovieService) {
+    public ListMoviesController(WatchlistService watchlistService,
+                                ListMoviesService listMoviesService) {
         this.watchlistService = watchlistService;
-        this.watchlistMovieService = watchlistMovieService;
-    }
-
-    @GetMapping
-    public Collection<WatchlistHasMovie> getMovies(@PathVariable long listId) {
-        if (!watchlistService.exists(listId)) {
-            throw new WatchlistNotFoundException();
-        }
-
-        return watchlistMovieService.getMovies(listId);
+        this.listMoviesService = listMoviesService;
     }
 
     @PostMapping
-    public WatchlistHasMovie addMovie(@PathVariable long listId,
-                                      @Valid @RequestBody MoviePost moviePost) {
+    public LocalizedListItem addMovie(@AuthenticationPrincipal UserPrincipal authPrincipal,
+                                      @PathVariable long listId,
+                                      @Valid @RequestBody WatchlistItemPost moviePost) {
         if (!watchlistService.exists(listId)) {
             throw new WatchlistNotFoundException();
         }
 
-        if (watchlistMovieService.existsByWatchlistAndTmdbId(
+        if (listMoviesService.existsByWatchlistAndTmdbId(
                 listId,
                 moviePost.getTmdbId())) {
             throw new DuplicatedWatchlistMovieException();
         }
 
-        return watchlistMovieService.addMovie(listId, moviePost);
+        return listMoviesService.addMovie(
+                listId,
+                authPrincipal.getId(),
+                moviePost
+        );
     }
 
     @PutMapping("{hasMovieId}")
@@ -61,12 +66,12 @@ public class WatchlistMovieController {
             throw new WatchlistNotFoundException();
         }
 
-        if (!watchlistMovieService.exists(hasMovieId)) {
+        if (!listMoviesService.exists(hasMovieId)) {
             throw new WatchlistHasMovieNotFoundException();
         }
 
         updateHasMovie.setHasMovieId(hasMovieId);
-        return watchlistMovieService.updateHasMovie(updateHasMovie);
+        return listMoviesService.updateHasMovie(updateHasMovie);
     }
 
     @DeleteMapping("{hasMovieId}")
@@ -77,10 +82,10 @@ public class WatchlistMovieController {
             throw new WatchlistNotFoundException();
         }
 
-        if (!watchlistMovieService.exists(hasMovieId)) {
+        if (!listMoviesService.exists(hasMovieId)) {
             throw new WatchlistHasMovieNotFoundException();
         }
 
-        watchlistMovieService.deleteHasMovie(hasMovieId);
+        listMoviesService.deleteHasMovie(hasMovieId);
     }
 }

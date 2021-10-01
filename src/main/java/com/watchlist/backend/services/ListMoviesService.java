@@ -1,16 +1,17 @@
 package com.watchlist.backend.services;
 
 import com.watchlist.backend.clients.TmdbClient;
-import com.watchlist.backend.dao.MovieDao;
 import com.watchlist.backend.dao.WatchlistHasMovieDao;
-import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
+import com.watchlist.backend.entities.db.Language;
+import com.watchlist.backend.entities.db.Movie;
+import com.watchlist.backend.entities.db.User;
+import com.watchlist.backend.entities.db.Watchlist;
+import com.watchlist.backend.entities.db.WatchlistHasMovie;
+import com.watchlist.backend.entities.json.LocalizedListItem;
+import com.watchlist.backend.entities.json.WatchlistItemPost;
 import com.watchlist.backend.exceptions.TmdbClientException;
 import com.watchlist.backend.exceptions.WatchlistHasMovieNotFoundException;
-import com.watchlist.backend.model.Movie;
-import com.watchlist.backend.model.User;
-import com.watchlist.backend.model.Watchlist;
-import com.watchlist.backend.model.WatchlistHasMovie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,26 +21,34 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 @Service
-public class WatchlistMovieService {
+public class ListMoviesService {
     private final static Logger log = LoggerFactory
-            .getLogger(WatchlistMovieService.class);
+            .getLogger(ListMoviesService.class);
 
     private final WatchlistHasMovieDao hasMovieDao;
-    private final MovieDao movieDao;
     private final EntityManager entityManager;
     private final TmdbClient tmdbClient;
 
-    public WatchlistMovieService(WatchlistHasMovieDao hasMovieDao,
-                                 MovieDao movieDao,
-                                 EntityManager entityManager,
-                                 TmdbClient tmdbClient) {
+    private final LocalizedMovieService locMovieService;
+    private final LocalizedMediaService locMediaService;
+    private final LanguageService langService;
+
+    public ListMoviesService(WatchlistHasMovieDao hasMovieDao,
+                             EntityManager entityManager,
+                             TmdbClient tmdbClient,
+                             LocalizedMovieService locMovieService,
+                             LocalizedMediaService locMediaService,
+                             LanguageService langService) {
         this.hasMovieDao = hasMovieDao;
-        this.movieDao = movieDao;
         this.entityManager = entityManager;
         this.tmdbClient = tmdbClient;
+        this.locMovieService = locMovieService;
+        this.locMediaService = locMediaService;
+        this.langService = langService;
     }
 
     public Collection<WatchlistHasMovie> getMovies(long watchlistId) {
@@ -66,30 +75,47 @@ public class WatchlistMovieService {
     }
 
     /**
-     * Adds a movie to a watchlist. If movie is not yet in our database
-     * will be fetched along all its details from tmdb API
+     * Adds a movie to watchlist. Movie will be fetched from tmdb even if
+     * is already in our db (Information will be updated)
+     *
+     * Movie will be fetched in all supported languages so that it be
+     * available for other languages in future
+     *
      * @param watchlistId List id
+     * @param addedById Id of user who is adding movie to list
      * @param moviePost DTO object representing the movie being added
-     * @return Created hasMovie object
+     * @return Created list content item
      */
     @Transactional
-    public WatchlistHasMovie addMovie(long watchlistId, MoviePost moviePost) {
-        Movie movie;
-        if (!movieDao.existsByTmdbId(moviePost.getTmdbId())) {
+    public LocalizedListItem addMovie(long watchlistId,
+                                      long addedById,
+                                      WatchlistItemPost moviePost) {
+        Movie dbMovie = null;
+
+        // Fetch and insert localizations for movie
+        for (String langISO639 : Language.SUPPORTED_LANGUAGES) {
             try {
-                movie = tmdbClient.getMovie(moviePost.getTmdbId());
-                movieDao.save(movie);
+                Movie movie = tmdbClient.getMovie(
+                        moviePost.getTmdbId(),
+                        langService.parseISO639(langISO639)
+                );
+
+                dbMovie = locMovieService.upsert(movie);
             } catch (IOException e) {
                 log.error("TMDBClient error", e);
                 throw new TmdbClientException();
             }
-        } else {
-            movie = movieDao.findByTmdbId(moviePost.getTmdbId());
+
+        }
+
+        if (Objects.isNull(dbMovie)) {
+            log.error("Movie was not saved");
+            throw new TmdbClientException();
         }
 
         User user = entityManager.getReference(
                 User.class,
-                moviePost.getAddedBy()
+                addedById
         );
         Watchlist watchlist = entityManager.getReference(
                 Watchlist.class,
@@ -99,11 +125,15 @@ public class WatchlistMovieService {
         WatchlistHasMovie hasMovie = new WatchlistHasMovie();
         hasMovie.setWatchlist(watchlist);
         hasMovie.setAddedBy(user);
+        hasMovie.setMovie(dbMovie);
         hasMovie.setAddedAt(new Date());
-        hasMovie.setMovie(movie);
         hasMovieDao.save(hasMovie);
 
-        return hasMovie;
+        // Return movie in language that client sent it
+        return locMediaService.toWatchlistItem(
+                hasMovie,
+                langService.parseISO639(moviePost.getLang())
+        );
     }
 
     /**

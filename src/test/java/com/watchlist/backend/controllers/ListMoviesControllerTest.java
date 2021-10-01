@@ -3,11 +3,12 @@ package com.watchlist.backend.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
-import com.watchlist.backend.entities.MoviePost;
 import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
+import com.watchlist.backend.entities.db.Language;
 import com.watchlist.backend.entities.db.WatchlistHasMovie;
-import com.watchlist.backend.security.JWTUtils;
-import com.watchlist.backend.services.WatchlistMovieService;
+import com.watchlist.backend.entities.json.LocalizedListItem;
+import com.watchlist.backend.entities.json.WatchlistItemPost;
+import com.watchlist.backend.services.ListMoviesService;
 import com.watchlist.backend.services.WatchlistService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,18 +32,16 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ListMoviesController.class)
 @Import(TestSecurityConfig.class)
-@MockBean({
-        JWTUtils.class,
-        RestTemplate.class,
-})
-public class ListMoviesControllerTest {
+@MockBean({ RestTemplate.class })
+public class ListMoviesControllerTest extends WithAuthenticationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,7 +50,7 @@ public class ListMoviesControllerTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private WatchlistMovieService watchlistMovieService;
+    private ListMoviesService listMoviesService;
 
     @MockBean
     private WatchlistService watchlistService;
@@ -67,7 +66,7 @@ public class ListMoviesControllerTest {
                 .when(watchlistService.exists(watchlistId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.getMovies(watchlistId))
+                .when(listMoviesService.getMovies(watchlistId))
                 .thenReturn(hasMovies);
 
         MockHttpServletRequestBuilder reqBuilder = MockMvcRequestBuilders.get(
@@ -105,63 +104,61 @@ public class ListMoviesControllerTest {
 
     @Test
     public void testAddMovie() throws Exception {
+        long userId = 1;
         long listId = 1;
         int tmdbId = 104;
-        long hasMovieId = 50001;
 
-        MoviePost moviePost = new MoviePost();
-        moviePost.setAddedBy(1);
+        WatchlistItemPost moviePost = new WatchlistItemPost();
+        moviePost.setLang(Language.ISO_ES_MX);
         moviePost.setTmdbId(tmdbId);
 
-        WatchlistHasMovie hasMovie = new WatchlistHasMovie();
-        hasMovie.setId(hasMovieId);
+        LocalizedListItem listItem = new LocalizedListItem();
+        listItem.setTmdbId(tmdbId);
 
         Mockito
                 .when(watchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.existsByWatchlistAndTmdbId(
+                .when(listMoviesService.existsByWatchlistAndTmdbId(
                         listId,
                         tmdbId
                 ))
                 .thenReturn(false);
         Mockito
-                .when(watchlistMovieService.addMovie(
+                .when(listMoviesService.addMovie(
                         anyLong(),
-                        any(MoviePost.class)
+                        anyLong(),
+                        any(WatchlistItemPost.class)
                 ))
-                .thenReturn(hasMovie);
+                .thenReturn(listItem);
 
         String reqBody = mapper.writeValueAsString(moviePost);
         MvcResult mvcResult = mockMvc
-                .perform(
-                        post(
-                                "/lists/{listId}/movies",
-                                listId
+                .perform(authenticatedPostBuilder(
+                            userId,
+                            "/lists/{listId}/movies",
+                            listId
                         )
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(reqBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reqBody)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.tmdb_id").isNumber())
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        WatchlistHasMovie responseHasMovie = mapper.readValue(
+        LocalizedListItem localizedListItem = mapper.readValue(
                 response,
-                WatchlistHasMovie.class
+                LocalizedListItem.class
         );
-        assertEquals(hasMovieId, responseHasMovie.getId());
+        assertEquals(tmdbId, localizedListItem.getTmdbId());
     }
 
     @Test
     public void testAddMovieWithoutValues() throws Exception {
-        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
-                new MoviePost(),
-                1
-        );
 
-        mockMvc.perform(reqBuilder)
+        // Post without 'tmdb_id' in req body
+        mockMvc.perform(makeReqBuilder(new WatchlistItemPost(), 1))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").isString())
                 .andExpect(jsonPath("$.errors").isArray());
@@ -172,21 +169,15 @@ public class ListMoviesControllerTest {
         long listId = 501;
         int tmdbId = 105;
 
-        MoviePost moviePost = new MoviePost();
-        moviePost.setAddedBy(1);
+        WatchlistItemPost moviePost = new WatchlistItemPost();
         moviePost.setTmdbId(tmdbId);
-
-        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
-                moviePost,
-                listId
-        );
 
         Mockito
                 .when(watchlistService.exists(listId))
                 .thenReturn(false);
 
         mockMvc
-                .perform(reqBuilder)
+                .perform(makeReqBuilder(moviePost, listId))
                 .andExpect(status().isNotFound());
     }
 
@@ -195,27 +186,21 @@ public class ListMoviesControllerTest {
         long listId = 501;
         int tmdbId = 105;
 
-        MoviePost moviePost = new MoviePost();
-        moviePost.setAddedBy(1);
+        WatchlistItemPost moviePost = new WatchlistItemPost();
         moviePost.setTmdbId(tmdbId);
-
-        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
-                moviePost,
-                listId
-        );
 
         Mockito
                 .when(watchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.existsByWatchlistAndTmdbId(
+                .when(listMoviesService.existsByWatchlistAndTmdbId(
                         listId,
                         tmdbId
                 ))
                 .thenReturn(true);
 
         mockMvc
-                .perform(reqBuilder)
+                .perform(makeReqBuilder(moviePost, listId))
                 .andExpect(status().isConflict());
     }
 
@@ -237,10 +222,10 @@ public class ListMoviesControllerTest {
                 .when(watchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.exists(hasMovieId))
+                .when(listMoviesService.exists(hasMovieId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.updateHasMovie(
+                .when(listMoviesService.updateHasMovie(
                         any(UpdateWatchlistHasMovie.class)
                 ))
                 .thenReturn(hasMovie);
@@ -301,7 +286,7 @@ public class ListMoviesControllerTest {
                 .when(watchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.exists(hasMovieId))
+                .when(listMoviesService.exists(hasMovieId))
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
@@ -324,7 +309,7 @@ public class ListMoviesControllerTest {
                 .when(watchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.exists(hasMovieId))
+                .when(listMoviesService.exists(hasMovieId))
                 .thenReturn(true);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
@@ -365,7 +350,7 @@ public class ListMoviesControllerTest {
                 .when(watchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(watchlistMovieService.exists(hasMovieId))
+                .when(listMoviesService.exists(hasMovieId))
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
@@ -378,18 +363,12 @@ public class ListMoviesControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    private MockHttpServletRequestBuilder makeRequestBuilder(
-            MoviePost moviePost,
+    private MockHttpServletRequestBuilder makeReqBuilder(
+            WatchlistItemPost moviePost,
             long listId) throws JsonProcessingException {
-        MockHttpServletRequestBuilder reqBuilder = post(
-                "/lists/{listId}/movies",
-                listId
-        );
-
-        reqBuilder
+        return authenticatedPostBuilder("/lists/{listId}/movies", listId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(moviePost));
-        return reqBuilder;
     }
 
     private MockHttpServletRequestBuilder makeRequestBuilder(

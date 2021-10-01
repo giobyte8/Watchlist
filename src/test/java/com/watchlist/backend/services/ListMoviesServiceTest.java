@@ -26,7 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WatchlistMovieServiceTest {
+public class ListMoviesServiceTest {
 
     @Mock
     private WatchlistHasMovieDao hasMovieDao;
@@ -41,7 +41,7 @@ public class WatchlistMovieServiceTest {
     private TmdbClient tmdbClient;
 
     @InjectMocks
-    private WatchlistMovieService watchlistMovieService;
+    private ListMoviesService listMoviesService;
 
     @Test
     public void testAddNonExistentMovie() throws IOException {
@@ -61,7 +61,7 @@ public class WatchlistMovieServiceTest {
 //                .when(tmdbClient.getMovie(tmdbId))
 //                .thenReturn(movie);
 
-        watchlistMovieService.addMovie(101, moviePost);
+//        watchlistMovieService.addMovie(101, moviePost);
 
         Mockito
                 .verify(movieDao, times(1))
@@ -89,7 +89,7 @@ public class WatchlistMovieServiceTest {
                 .when(movieDao.findByTmdbId(tmdbId))
                 .thenReturn(movie);
 
-        watchlistMovieService.addMovie(101, moviePost);
+//        watchlistMovieService.addMovie(101, moviePost);
 
         Mockito
                 .verify(movieDao, never())
@@ -115,7 +115,7 @@ public class WatchlistMovieServiceTest {
                 .when(hasMovieDao.findById(hasMovieId))
                 .thenReturn(Optional.of(dbHasMovie));
 
-        WatchlistHasMovie rHasMovie = watchlistMovieService
+        WatchlistHasMovie rHasMovie = listMoviesService
                 .updateHasMovie(updateHasMovie);
 
         assertEquals(updateHasMovie.getHasMovieId(), rHasMovie.getId());
@@ -135,7 +135,7 @@ public class WatchlistMovieServiceTest {
                 .when(hasMovieDao.findById(hasMovieId))
                 .thenReturn(Optional.empty());
 
-        watchlistMovieService.updateHasMovie(updateHasMovie);
+        listMoviesService.updateHasMovie(updateHasMovie);
 
         // Then exception should be thrown
     }
