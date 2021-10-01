@@ -637,9 +637,6 @@ components:
     LocalizedMovie:
       type: object
       properties:
-        id:
-          type: integer
-          format: int32
         tmdb_id:
           type: integer
           format: int32
@@ -675,9 +672,6 @@ components:
     LocalizedTVShow:
       type: object
       properties:
-        id:
-          type: integer
-          format: int32
         tmdb_id:
           type: integer
           format: int32

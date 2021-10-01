@@ -3,7 +3,7 @@ package com.watchlist.backend.services;
 import com.watchlist.backend.entities.db.*;
 import com.watchlist.backend.entities.json.JGenre;
 import com.watchlist.backend.entities.json.MediaType;
-import com.watchlist.backend.entities.json.WatchlistItem;
+import com.watchlist.backend.entities.json.LocalizedListItem;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,50 +13,52 @@ import java.util.Optional;
 @Service
 public class LocalizedMediaService {
 
-    public WatchlistItem toWatchlistItem(WatchlistHasMovie hasMovie,
-                                          Language lang) {
-        WatchlistItem watchlistItem = new WatchlistItem();
+    public LocalizedListItem toWatchlistItem(WatchlistHasMovie hasMovie,
+                                             Language lang) {
+        LocalizedListItem localizedListItem = new LocalizedListItem();
         LocalizedMovie localizedMovie = findMovieForLang(
                 hasMovie.getMovie().getLocalizedMovies(),
                 lang
         );
 
-        watchlistItem.setTmdbId(hasMovie.getMovie().getTmdbId());
-        watchlistItem.setReleaseDate(hasMovie.getMovie().getReleaseDate());
-        watchlistItem.setTitle(localizedMovie.getTitle());
-        watchlistItem.setSynopsis(localizedMovie.getSynopsis());
-        watchlistItem.setPosterPath(localizedMovie.getPosterPath());
-        watchlistItem.setBackdropPath(localizedMovie.getBackdropPath());
-        watchlistItem.setMediaType(MediaType.MOVIE);
-        watchlistItem.setGenres(getLocalizedMovieGenres(
+        localizedListItem.setLang(lang.getIso639());
+        localizedListItem.setTmdbId(hasMovie.getMovie().getTmdbId());
+        localizedListItem.setReleaseDate(hasMovie.getMovie().getReleaseDate());
+        localizedListItem.setTitle(localizedMovie.getTitle());
+        localizedListItem.setSynopsis(localizedMovie.getSynopsis());
+        localizedListItem.setPosterPath(localizedMovie.getPosterPath());
+        localizedListItem.setBackdropPath(localizedMovie.getBackdropPath());
+        localizedListItem.setMediaType(MediaType.MOVIE);
+        localizedListItem.setGenres(getLocalizedMovieGenres(
                 hasMovie.getMovie().getGenres(),
                 lang
         ));
 
-        return watchlistItem;
+        return localizedListItem;
     }
 
-    public WatchlistItem toWatchlistItem(WatchlistHasTVShow hasTVShow,
-                                         Language lang) {
-        WatchlistItem watchlistItem = new WatchlistItem();
+    public LocalizedListItem toWatchlistItem(WatchlistHasTVShow hasTVShow,
+                                             Language lang) {
+        LocalizedListItem localizedListItem = new LocalizedListItem();
         LocalizedTVShow localizedTVShow = findTVForLang(
                 hasTVShow.getTvShow().getLocalizedTVShows(),
                 lang
         );
 
-        watchlistItem.setTmdbId(hasTVShow.getTvShow().getTmdbId());
-        watchlistItem.setReleaseDate(hasTVShow.getTvShow().getFirstAirDate());
-        watchlistItem.setTitle(localizedTVShow.getTitle());
-        watchlistItem.setSynopsis(localizedTVShow.getSynopsis());
-        watchlistItem.setPosterPath(localizedTVShow.getPosterPath());
-        watchlistItem.setBackdropPath(localizedTVShow.getBackdropPath());
-        watchlistItem.setMediaType(MediaType.TV);
-        watchlistItem.setGenres(getLocalizedTVShowGenres(
+        localizedListItem.setLang(lang.getIso639());
+        localizedListItem.setTmdbId(hasTVShow.getTvShow().getTmdbId());
+        localizedListItem.setReleaseDate(hasTVShow.getTvShow().getFirstAirDate());
+        localizedListItem.setTitle(localizedTVShow.getTitle());
+        localizedListItem.setSynopsis(localizedTVShow.getSynopsis());
+        localizedListItem.setPosterPath(localizedTVShow.getPosterPath());
+        localizedListItem.setBackdropPath(localizedTVShow.getBackdropPath());
+        localizedListItem.setMediaType(MediaType.TV);
+        localizedListItem.setGenres(getLocalizedTVShowGenres(
                 hasTVShow.getTvShow().getGenres(),
                 lang
         ));
 
-        return watchlistItem;
+        return localizedListItem;
     }
 
     /**

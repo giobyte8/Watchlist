@@ -9,11 +9,12 @@ import java.util.List;
 /**
  * Localized representation of a Movie or TV Show
  */
-public class WatchlistItem {
+public class LocalizedListItem {
 
     @JsonProperty("tmdb_id")
     private int tmdbId;
 
+    private String lang;
     private String title;
     private String synopsis;
 
@@ -37,6 +38,14 @@ public class WatchlistItem {
 
     public void setTmdbId(int tmdbId) {
         this.tmdbId = tmdbId;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 
     public String getTitle() {

@@ -6,7 +6,7 @@ import com.watchlist.backend.entities.db.Language;
 import com.watchlist.backend.entities.db.Watchlist;
 import com.watchlist.backend.entities.db.WatchlistHasMovie;
 import com.watchlist.backend.entities.db.WatchlistHasTVShow;
-import com.watchlist.backend.entities.json.WatchlistItem;
+import com.watchlist.backend.entities.json.LocalizedListItem;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -35,7 +35,7 @@ public class ListContentService {
         this.localizedMediaService = localizedMediaService;
     }
 
-    public List<WatchlistItem> getListContent(long listId, String iso639) {
+    public List<LocalizedListItem> getListContent(long listId, String iso639) {
         Watchlist list = entityManager.getReference(
                 Watchlist.class,
                 listId
@@ -46,7 +46,7 @@ public class ListContentService {
                 .findByWatchlistOrderByAddedAtDesc(list);
         Queue<WatchlistHasTVShow> hasTVShows = hasTVShowDao
                 .findByWatchlistOrderByAddedAtDesc(list);
-        List<WatchlistItem> listContent =
+        List<LocalizedListItem> listContent =
                 new ArrayList<>(hasMovies.size() + hasTVShows.size());
 
         WatchlistHasMovie hasMovie = hasMovies.poll();
