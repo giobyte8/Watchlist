@@ -257,7 +257,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Element does not exists
-    put:
+    patch:
       tags:
       - List movies
       summary: Updates a specified watchlist's movie
@@ -284,7 +284,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WatchlistItemPut'
+              $ref: '#/components/schemas/WatchlistItemPatch'
       responses:
         '204':
           description: Element was updated successfully
@@ -411,7 +411,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Element does not exists
-    put:
+    patch:
       tags:
         - List's TV Shows
       summary: Updates a specified watchlist's tv show
@@ -438,7 +438,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WatchlistItemPut'
+              $ref: '#/components/schemas/WatchlistItemPatch'
       responses:
         '204':
           description: Element was updated successfully
@@ -755,7 +755,7 @@ components:
         lang:
           $ref: '#/components/schemas/Lang'
 
-    WatchlistItemPut:
+    WatchlistItemPatch:
       type: object
       properties:
         seen_at:
