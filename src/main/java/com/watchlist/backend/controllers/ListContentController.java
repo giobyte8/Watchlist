@@ -1,7 +1,7 @@
 package com.watchlist.backend.controllers;
 
 import com.watchlist.backend.entities.db.Language;
-import com.watchlist.backend.entities.json.WatchlistItem;
+import com.watchlist.backend.entities.json.LocalizedListItem;
 import com.watchlist.backend.exceptions.WatchlistNotFoundException;
 import com.watchlist.backend.services.ListContentService;
 import com.watchlist.backend.services.WatchlistService;
@@ -23,8 +23,8 @@ public class ListContentController {
     }
 
     @GetMapping("{listId}")
-    public List<WatchlistItem> getContents(@PathVariable long listId,
-                                           @RequestParam(
+    public List<LocalizedListItem> getContents(@PathVariable long listId,
+                                               @RequestParam(
                                                    required = false,
                                                    name = "lang",
                                                    defaultValue = Language.ISO_EN_US
