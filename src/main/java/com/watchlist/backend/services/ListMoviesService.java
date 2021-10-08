@@ -2,7 +2,6 @@ package com.watchlist.backend.services;
 
 import com.watchlist.backend.clients.TmdbClient;
 import com.watchlist.backend.dao.WatchlistHasMovieDao;
-import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
 import com.watchlist.backend.entities.db.Language;
 import com.watchlist.backend.entities.db.Movie;
 import com.watchlist.backend.entities.db.User;
@@ -10,9 +9,10 @@ import com.watchlist.backend.entities.db.Watchlist;
 import com.watchlist.backend.entities.db.WatchlistHasMovie;
 import com.watchlist.backend.entities.json.LocalizedListHasMovie;
 import com.watchlist.backend.entities.json.LocalizedListItem;
+import com.watchlist.backend.entities.json.WatchlistItemPatch;
 import com.watchlist.backend.entities.json.WatchlistItemPost;
-import com.watchlist.backend.exceptions.TmdbClientException;
 import com.watchlist.backend.exceptions.ListHasItemNotFoundException;
+import com.watchlist.backend.exceptions.TmdbClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -128,11 +127,13 @@ public class ListMoviesService {
         );
     }
 
-    public LocalizedListHasMovie getMovie(long listId, int tmdbId, String lang) {
-        WatchlistHasMovie hasMovie = hasMovieDao.findByWatchlistAndTmdbId(
-                listId,
-                tmdbId
-        );
+    public LocalizedListHasMovie getMovie(long listId, int tmdbId, String lang)
+            throws Throwable {
+        Supplier<Throwable> notFoundSupplier =
+                ListHasItemNotFoundException::new;
+        WatchlistHasMovie hasMovie = hasMovieDao
+                .findByWatchlistAndTmdbId(listId, tmdbId)
+                .orElseThrow(notFoundSupplier);
 
         return locMediaService.toLocalizedHasMovie(
                 hasMovie,
@@ -141,28 +142,36 @@ public class ListMoviesService {
     }
 
     /**
-     * Updates provided watchlist 'hasMovie' (Queried by id). Only
-     * 'seen_at' will be updated for now
+     * Updates 'seen_at' field for provided movie (tmdbId) in
+     * specified watchlist
      *
-     * @param hasMovie Watchlist has movie element to update
-     * @return Updated element
-     * @throws Throwable In case that provided has movie id does not exists
+     * @param listId Watchlist id
+     * @param tmdbId Movie id
+     * @param hasMoviePatch Patch request body
      */
-    public WatchlistHasMovie updateHasMovie(UpdateWatchlistHasMovie hasMovie)
+    public WatchlistHasMovie updateHasMovie(long listId,
+                                            int tmdbId,
+                                            WatchlistItemPatch hasMoviePatch)
             throws Throwable {
         Supplier<Throwable> notFoundSupplier =
                 ListHasItemNotFoundException::new;
-        WatchlistHasMovie dbHasMovie = hasMovieDao
-                .findById(hasMovie.getHasMovieId())
+        WatchlistHasMovie hasMovie = hasMovieDao
+                .findByWatchlistAndTmdbId(listId, tmdbId)
                 .orElseThrow(notFoundSupplier);
 
-        dbHasMovie.setSeenAt(hasMovie.getSeenAt());
-        hasMovieDao.save(dbHasMovie);
+        hasMovie.setSeenAt(hasMoviePatch.getSeenAt());
+        hasMovieDao.save(hasMovie);
 
-        return dbHasMovie;
+        return hasMovie;
     }
 
-    public void deleteHasMovie(long hasMovieId) {
-        hasMovieDao.deleteById(hasMovieId);
+    public void deleteHasMovie(long listId, int tmdbId) throws Throwable {
+        Supplier<Throwable> notFoundSupplier =
+                ListHasItemNotFoundException::new;
+        WatchlistHasMovie hasMovie = hasMovieDao
+                .findByWatchlistAndTmdbId(listId, tmdbId)
+                .orElseThrow(notFoundSupplier);
+
+        hasMovieDao.delete(hasMovie);
     }
 }

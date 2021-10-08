@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.Queue;
 
 public interface WatchlistHasMovieDao
@@ -24,6 +25,8 @@ public interface WatchlistHasMovieDao
             "FROM WatchlistHasMovie whm " +
             "WHERE whm.watchlist.id = :watchlistId " +
             "  AND whm.movie.tmdbId = :tmdbId")
-    WatchlistHasMovie findByWatchlistAndTmdbId(@Param("watchlistId") long watchlistId,
-                                               @Param("tmdbId") int tmdbId);
+    Optional<WatchlistHasMovie> findByWatchlistAndTmdbId(
+            @Param("watchlistId") long watchlistId,
+            @Param("tmdbId") int tmdbId
+    );
 }

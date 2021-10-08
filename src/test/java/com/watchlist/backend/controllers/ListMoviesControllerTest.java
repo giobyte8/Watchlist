@@ -3,10 +3,10 @@ package com.watchlist.backend.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchlist.backend.TestSecurityConfig;
-import com.watchlist.backend.entities.UpdateWatchlistHasMovie;
 import com.watchlist.backend.entities.db.Language;
-import com.watchlist.backend.entities.db.WatchlistHasMovie;
+import com.watchlist.backend.entities.json.LocalizedListHasMovie;
 import com.watchlist.backend.entities.json.LocalizedListItem;
+import com.watchlist.backend.entities.json.WatchlistItemPatch;
 import com.watchlist.backend.entities.json.WatchlistItemPost;
 import com.watchlist.backend.services.ListMoviesService;
 import com.watchlist.backend.services.WatchlistService;
@@ -22,18 +22,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,61 +50,13 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private ListMoviesService listMoviesService;
+    private ListMoviesService mockListMoviesService;
 
     @MockBean
-    private WatchlistService watchlistService;
-
-    @Test
-    public void testGetMovies() throws Exception {
-        long watchlistId = 101L;
-        List<WatchlistHasMovie> hasMovies = Collections.singletonList(
-                new WatchlistHasMovie()
-        );
-
-        Mockito
-                .when(watchlistService.exists(watchlistId))
-                .thenReturn(true);
-        Mockito
-                .when(listMoviesService.getMovies(watchlistId))
-                .thenReturn(hasMovies);
-
-        MockHttpServletRequestBuilder reqBuilder = MockMvcRequestBuilders.get(
-                "/lists/{listId}/movies",
-                watchlistId
-        );
-        MvcResult mvcResult = mockMvc
-                .perform(reqBuilder)
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-        WatchlistHasMovie[] recHasMovies = mapper.readValue(
-                mvcResult.getResponse().getContentAsString(),
-                WatchlistHasMovie[].class
-        );
-
-        assertEquals(1, recHasMovies.length);
-    }
-
-    @Test
-    public void getMoviesOfNonExistentList() throws Exception {
-        long watchlistId = 501L;
-        Mockito
-                .when(watchlistService.exists(watchlistId))
-                .thenReturn(false);
-
-        MockHttpServletRequestBuilder reqBuilder = MockMvcRequestBuilders.get(
-                "/lists/{listId}/movies",
-                watchlistId
-        );
-        mockMvc
-                .perform(reqBuilder)
-                .andExpect(status().isNotFound());
-
-    }
+    private WatchlistService mockWatchlistService;
 
     @Test
     public void testAddMovie() throws Exception {
-        long userId = 1;
         long listId = 1;
         int tmdbId = 104;
 
@@ -116,16 +68,16 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
         listItem.setTmdbId(tmdbId);
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(listMoviesService.existsByWatchlistAndTmdbId(
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
                         listId,
                         tmdbId
                 ))
                 .thenReturn(false);
         Mockito
-                .when(listMoviesService.addMovie(
+                .when(mockListMoviesService.addMovie(
                         anyLong(),
                         anyLong(),
                         any(WatchlistItemPost.class)
@@ -134,14 +86,12 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
 
         String reqBody = mapper.writeValueAsString(moviePost);
         MvcResult mvcResult = mockMvc
-                .perform(authenticatedPostBuilder(
-                            userId,
-                            "/lists/{listId}/movies",
-                            listId
-                        )
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(reqBody)
-                )
+                .perform(authPostBuilder(
+                        MediaType.APPLICATION_JSON,
+                        reqBody,
+                        "/lists/{listId}/movies",
+                        listId
+                ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tmdb_id").isNumber())
                 .andReturn();
@@ -155,7 +105,7 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
     }
 
     @Test
-    public void testAddMovieWithoutValues() throws Exception {
+    public void testAddMovie_InvalidPayload() throws Exception {
 
         // Post without 'tmdb_id' in req body
         mockMvc.perform(makeReqBuilder(new WatchlistItemPost(), 1))
@@ -165,24 +115,30 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
     }
 
     @Test
-    public void testAddMovieToNonExistentList() throws Exception {
+    public void testAddMovie_NonExistentList() throws Exception  {
         long listId = 501;
         int tmdbId = 105;
 
         WatchlistItemPost moviePost = new WatchlistItemPost();
         moviePost.setTmdbId(tmdbId);
 
+        String reqBody = mapper.writeValueAsString(moviePost);
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(false);
 
         mockMvc
-                .perform(makeReqBuilder(moviePost, listId))
+                .perform(authPostBuilder(
+                        MediaType.APPLICATION_JSON,
+                        reqBody,
+                        "/lists/{listId}/movies",
+                        listId
+                ))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testAddDuplicatedMovie() throws Exception {
+    public void testAddMovie_ExistentMovie() throws Exception {
         long listId = 501;
         int tmdbId = 105;
 
@@ -190,150 +146,239 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
         moviePost.setTmdbId(tmdbId);
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(listMoviesService.existsByWatchlistAndTmdbId(
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
                         listId,
                         tmdbId
                 ))
                 .thenReturn(true);
 
+        String reqBody = mapper.writeValueAsString(moviePost);
         mockMvc
-                .perform(makeReqBuilder(moviePost, listId))
+                .perform(authPostBuilder(
+                        MediaType.APPLICATION_JSON,
+                        reqBody,
+                        "/lists/{listId}/movies",
+                        listId
+                ))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    public void testUpdateMovie() throws Throwable {
-        long listId = 101;
-        long hasMovieId = 100000;
+    public void testGetListHasMovie() throws Throwable {
+        long hasMovieId = 5000;
+        long watchlistId = 101;
+        int tmdbId = 123;
 
-        Date seenAt = new Date();
-
-        WatchlistHasMovie hasMovie = new WatchlistHasMovie();
+        LocalizedListHasMovie hasMovie = new LocalizedListHasMovie();
         hasMovie.setId(hasMovieId);
-        hasMovie.setSeenAt(seenAt);
 
-        UpdateWatchlistHasMovie updateHasMovie = new UpdateWatchlistHasMovie();
-        updateHasMovie.setSeenAt(seenAt);
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(watchlistId))
                 .thenReturn(true);
         Mockito
-                .when(listMoviesService.exists(hasMovieId))
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
+                        watchlistId,
+                        tmdbId
+                ))
                 .thenReturn(true);
         Mockito
-                .when(listMoviesService.updateHasMovie(
-                        any(UpdateWatchlistHasMovie.class)
+                .when(mockListMoviesService.getMovie(
+                        watchlistId,
+                        tmdbId,
+                        Language.ISO_EN_US
                 ))
                 .thenReturn(hasMovie);
 
-        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
-                updateHasMovie,
-                listId,
-                hasMovieId
+        MockHttpServletRequestBuilder reqBuilder = get(
+                "/lists/{listId}/movies/{tmdbId}",
+                watchlistId,
+                tmdbId
         );
-        MvcResult mvcResult = mockMvc.perform(reqBuilder)
-                .andExpect(status().isOk())
+        MvcResult mvcResult = mockMvc
+                .perform(reqBuilder)
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
 
-        String jHasMovie = mvcResult.getResponse().getContentAsString();
-        WatchlistHasMovie rHasMovie = mapper.readValue(
-                jHasMovie,
-                WatchlistHasMovie.class
+        LocalizedListHasMovie locHasMovie = mapper.readValue(
+                mvcResult.getResponse().getContentAsString(),
+                LocalizedListHasMovie.class
         );
 
-        assertEquals(
-                rHasMovie.getSeenAt(),
-                updateHasMovie.getSeenAt()
-        );
+        assertEquals(hasMovieId, locHasMovie.getId());
     }
 
     @Test
-    public void testUpdateMovieNonExistentList() throws Throwable {
-        long listId = 101;
-        long hasMovieId = 100000;
-
-        UpdateWatchlistHasMovie updateHasMovie = new UpdateWatchlistHasMovie();
-        updateHasMovie.setSeenAt(new Date());
+    public void testGetListHasMovie_NonExistentList() throws Exception {
+        long listId = 501;
+        int tmdbId = 1;
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
+                .thenReturn(false);
+
+        mockMvc
+                .perform(get(
+                        "/lists/{listId}/movies/{tmdbId}",
+                        listId,
+                        tmdbId
+                ))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetListHasMovie_NonExistentMovie() throws Exception {
+        long listId = 501;
+        int tmdbId = 1;
+
+        Mockito
+                .when(mockWatchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
+                        listId,
+                        tmdbId
+                ))
+                .thenReturn(false);
+
+        mockMvc
+                .perform(get(
+                        "/lists/{listId}/movies/{tmdbId}",
+                        listId,
+                        tmdbId
+                ))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testPatchListHasMovie() throws Throwable {
+        long listId = 101;
+        int tmdbId = 1000;
+
+        WatchlistItemPatch hasMoviePatch = new WatchlistItemPatch();
+        hasMoviePatch.setSeenAt(new Date());
+
+        Mockito
+                .when(mockWatchlistService.exists(listId))
+                .thenReturn(true);
+        Mockito
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
+                        listId,
+                        tmdbId
+                ))
+                .thenReturn(true);
+
+        MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
+                listId,
+                tmdbId,
+                hasMoviePatch
+        );
+        mockMvc.perform(reqBuilder)
+                .andExpect(status().is2xxSuccessful());
+
+        Mockito
+                .verify(mockListMoviesService, times(1))
+                .updateHasMovie(
+                        anyLong(),
+                        anyInt(),
+                        any(WatchlistItemPatch.class)
+                );
+    }
+
+    @Test
+    public void testPatchListHasMovie_NonExistingList() throws Throwable {
+        long listId = 101;
+        int tmdbId = 100000;
+
+        WatchlistItemPatch hasMoviePatch = new WatchlistItemPatch();
+        hasMoviePatch.setSeenAt(new Date());
+
+        Mockito
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
-                updateHasMovie,
                 listId,
-                hasMovieId
+                tmdbId,
+                hasMoviePatch
         );
 
         mockMvc.perform(reqBuilder)
-                .andExpect(status()
-                .isNotFound());
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testUpdateNonExistentWatchlistHasMovie() throws Throwable {
+    public void testPatchListHasMovie_NonExistentMovie() throws Throwable {
         long listId = 101;
-        long hasMovieId = 100000;
+        int tmdbId = 100000;
 
-        UpdateWatchlistHasMovie updateHasMovie = new UpdateWatchlistHasMovie();
-        updateHasMovie.setSeenAt(new Date());
+        WatchlistItemPatch hasMoviePatch = new WatchlistItemPatch();
+        hasMoviePatch.setSeenAt(new Date());
 
         Mockito
-                .when(watchlistService.exists(listId))
-                .thenReturn(true);
+                .when(mockWatchlistService.exists(listId))
+                .thenReturn(false);
         Mockito
-                .when(listMoviesService.exists(hasMovieId))
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
+                        listId,
+                        tmdbId
+                ))
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
-                updateHasMovie,
                 listId,
-                hasMovieId
+                tmdbId,
+                hasMoviePatch
         );
 
-        mockMvc
-                .perform(reqBuilder)
+        mockMvc.perform(reqBuilder)
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void testDeleteWatchlistHasMovie() throws Throwable {
-        long listId = 101;
-        long hasMovieId = 100000;
+        long listId = 1001;
+        int tmdbId = 100;
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(listMoviesService.exists(hasMovieId))
+                .when(mockListMoviesService.existsByWatchlistAndTmdbId(
+                        listId,
+                        tmdbId
+                ))
                 .thenReturn(true);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
                 listId,
-                hasMovieId
+                tmdbId
         );
 
         mockMvc
                 .perform(reqBuilder)
                 .andExpect(status().isNoContent());
+
+        Mockito
+                .verify(mockListMoviesService, times(1))
+                .deleteHasMovie(listId, tmdbId);
     }
 
     @Test
-    public void testDeleteHasMovieNonExistentList() throws Throwable {
+    public void testDeleteWatchlistHasMovie_NonExistentList() throws Throwable {
         long listId = 101;
-        long hasMovieId = 100000;
+        int tmdbId = 10000;
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
                 listId,
-                hasMovieId
+                tmdbId
         );
 
         mockMvc
@@ -342,20 +387,20 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
     }
 
     @Test
-    public void testDeleteNonExistentWatchlistHasMovie() throws Throwable {
+    public void testDeleteWatchlistHasMovie_NonExistentMovie() throws Throwable {
         long listId = 101;
-        long hasMovieId = 100000;
+        int tmdbId = 10000;
 
         Mockito
-                .when(watchlistService.exists(listId))
+                .when(mockWatchlistService.exists(listId))
                 .thenReturn(true);
         Mockito
-                .when(listMoviesService.exists(hasMovieId))
+                .when(mockListMoviesService.exists(tmdbId))
                 .thenReturn(false);
 
         MockHttpServletRequestBuilder reqBuilder = makeRequestBuilder(
                 listId,
-                hasMovieId
+                tmdbId
         );
 
         mockMvc
@@ -366,34 +411,34 @@ public class ListMoviesControllerTest extends WithAuthenticationTest {
     private MockHttpServletRequestBuilder makeReqBuilder(
             WatchlistItemPost moviePost,
             long listId) throws JsonProcessingException {
-        return authenticatedPostBuilder("/lists/{listId}/movies", listId)
+        return authPostBuilder("/lists/{listId}/movies", listId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(moviePost));
     }
 
     private MockHttpServletRequestBuilder makeRequestBuilder(
-            UpdateWatchlistHasMovie updateHasMovie,
             long listId,
-            long hasMovieId) throws JsonProcessingException {
-        MockHttpServletRequestBuilder reqBuilder = put(
-                "/lists/{listId}/movies/{hasMovieId}",
+            int tmdbId,
+            WatchlistItemPatch hasMoviePatch) throws JsonProcessingException {
+        MockHttpServletRequestBuilder reqBuilder = patch(
+                "/lists/{listId}/movies/{tmdbId}",
                 listId,
-                hasMovieId
+                tmdbId
         );
 
         reqBuilder
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(updateHasMovie));
+                .content(mapper.writeValueAsString(hasMoviePatch));
         return reqBuilder;
     }
 
     private MockHttpServletRequestBuilder makeRequestBuilder(
             long listId,
-            long hasMovieId) {
+            int tmdbId) {
         return delete(
-                "/lists/{listId}/movies/{hasMovieId}",
+                "/lists/{listId}/movies/{tmdbId}",
                 listId,
-                hasMovieId
+                tmdbId
         );
     }
 }

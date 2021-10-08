@@ -4,6 +4,7 @@ import com.watchlist.backend.security.JWTUtils;
 import com.watchlist.backend.security.UserPrincipal;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,22 +16,48 @@ public class WithAuthenticationTest {
     private JWTUtils mockJwtUtils;
 
     private final String testToken = "testToken";
+    private final long defaultAuthUserId = 1;
 
-    public MockHttpServletRequestBuilder authenticatedPostBuilder(
+    public MockHttpServletRequestBuilder authPostBuilder(
             String urlTemplate,
             Object... uriParams) {
-        return authenticatedPostBuilder(
-                1,
+        return authPostBuilder(
+                defaultAuthUserId,
                 urlTemplate,
                 uriParams
         );
     }
 
-    public MockHttpServletRequestBuilder authenticatedPostBuilder(
-            long userId,
+    public MockHttpServletRequestBuilder authPostBuilder(
+            MediaType mediaType,
+            String payload,
+            long authUserId,
             String urlTemplate,
             Object... uriParams) {
-        setupAuthMocks(userId);
+
+        return authPostBuilder(authUserId, urlTemplate, uriParams)
+                .contentType(mediaType)
+                .content(payload);
+    }
+
+    public MockHttpServletRequestBuilder authPostBuilder(
+            MediaType mediaType,
+            String payload,
+            String urlTemplate,
+            Object... uriParams) {
+
+        return authPostBuilder(defaultAuthUserId, urlTemplate, uriParams)
+                .contentType(mediaType)
+                .content(payload);
+    }
+
+    public MockHttpServletRequestBuilder authPostBuilder(
+            long authUserId,
+            String urlTemplate,
+            Object... uriParams) {
+
+        setupAuthMocks(authUserId);
+
         return post(urlTemplate, uriParams).header(
                 "Authorization",
                 testToken

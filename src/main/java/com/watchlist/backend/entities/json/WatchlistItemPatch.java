@@ -2,16 +2,18 @@ package com.watchlist.backend.entities.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class WatchlistItemPut {
+import java.util.Date;
+
+public class WatchlistItemPatch {
 
     @JsonProperty("seen_at")
-    private String seenAt;
+    private Date seenAt;
 
-    public String getSeenAt() {
+    public Date getSeenAt() {
         return seenAt;
     }
 
-    public void setSeenAt(String seenAt) {
+    public void setSeenAt(Date seenAt) {
         this.seenAt = seenAt;
     }
 }
